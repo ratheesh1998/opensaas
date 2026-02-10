@@ -1,0 +1,981 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ organization.name }} - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --primary-light: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #0f1419;
+            --surface: #1a1f2e;
+            --surface-elevated: #242938;
+            --border: #2d3548;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 72px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-text .title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .brand-text .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        /* Header Card */
+        .header-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-card h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .header-card .description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 24px;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-item .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .stat-item .value {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 8px;
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        .tab-nav::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .tab-nav::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            font-family: 'Sora', sans-serif;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title .icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .info-item {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: var(--surface);
+            border-color: var(--primary);
+        }
+
+        .info-item .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info-item .value {
+            font-size: 15px;
+            color: var(--text-primary);
+            word-break: break-all;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+        }
+
+        .info-item a {
+            color: var(--primary-light);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .info-item a:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        /* Status Badge */
+        .status-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 24px;
+            background: var(--surface-elevated);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .status-badge {
+            padding: 8px 20px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--success), #14b8a6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .action-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Sora', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface);
+            border-color: var(--primary);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Environment Variables */
+        .env-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .env-item {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .env-item:hover {
+            border-color: var(--primary);
+        }
+
+        .env-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr 150px auto;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-select {
+            padding: 12px 16px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Sora', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Add Env Form */
+        .add-env-card {
+            background: var(--surface-elevated);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            margin-top: 20px;
+        }
+
+        .add-env-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .add-env-card label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .add-env-card input,
+        .add-env-card select {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        /* Danger Zone */
+        .danger-card {
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px solid var(--danger);
+            border-radius: 16px;
+            padding: 28px;
+        }
+
+        .danger-card .card-title {
+            color: var(--danger);
+        }
+
+        .warning-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+            display: none;
+            animation: slideUp 0.3s ease;
+            z-index: 2000;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        .toast.success {
+            border-color: var(--success);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .env-form {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-stats {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 20px;
+            }
+
+            .navbar-content {
+                padding: 0 20px;
+            }
+
+            .header-card {
+                padding: 28px;
+            }
+
+            .header-card h1 {
+                font-size: 28px;
+            }
+
+            .status-container {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            .action-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tab-nav {
+                padding: 6px;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* Code styling */
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface-elevated);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <div class="logo">{{ organization.name|first|upper }}</div>
+                <div class="brand-text">
+                    <span class="title">{{ organization.name }}</span>
+                    <span class="subtitle">Instance Dashboard</span>
+                </div>
+            </div>
+            <div class="navbar-actions">
+                <button class="btn btn-secondary btn-icon" title="Notifications">🔔</button>
+                <button class="btn btn-secondary btn-icon" title="Settings">⚙️</button>
+                <a href="{% url 'superuser_logout' %}" class="btn btn-secondary" title="Log out">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header Card -->
+        <div class="header-card">
+            <div class="header-content">
+                <h1>{{ organization.name }}</h1>
+                <p class="description">Manage your SaaS instance, deployments, and configurations</p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="label">Status</span>
+                        <span class="value">{{ deployment_status }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Docker Image</span>
+                        <span class="value">{{ organization.docker_image|truncatechars:20 }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Database</span>
+                        <span class="value">{{ organization.database_name }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab(event, 'overview')">
+                📊 Overview
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'deployment')">
+                🚀 Deployment
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'environment')">
+                🔧 Environment
+            </button>
+            <button class="tab-btn" onclick="switchTab(event, 'settings')">
+                ⚙️ Settings
+            </button>
+        </div>
+
+        <!-- Tab Content: Overview -->
+        <div id="overview" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="icon">📋</span>
+                        Organization Information
+                    </h2>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">Organization Name</div>
+                        <div class="value">{{ organization.name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Docker Image</div>
+                        <div class="value">{{ organization.docker_image }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Database Name</div>
+                        <div class="value">{{ organization.database_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Project ID</div>
+                        <div class="value">{{ project_id.project_id }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Environment ID</div>
+                        <div class="value">{{ project_id.environment_id }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Service ID</div>
+                        <div class="value">{{ organization.service_set.first.service_id }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="icon">🌐</span>
+                        Access Information
+                    </h2>
+                </div>
+                <div class="info-item">
+                    <div class="label">Default Domain</div>
+                    <div class="value">
+                        <a href="{{ organization.default_domain }}" target="_blank">{{ organization.default_domain }} →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Deployment -->
+        <div id="deployment" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="icon">🚀</span>
+                        Deployment Status
+                    </h2>
+                </div>
+                <div class="status-container">
+                    <div class="status-info">
+                        <span class="status-badge" id="statusBadge">{{ deployment_status }}</span>
+                        <div>
+                            <div class="status-label">Current deployment status</div>
+                        </div>
+                    </div>
+                    <div class="action-group">
+                        <button class="btn btn-primary" onclick="checkDeploymentStatus({{ organization.id }})">
+                            🔄 Check Status
+                        </button>
+                        <a href="{% url 'deployment_reload' organization.id %}" class="btn btn-secondary">
+                            ↻ Reload
+                        </a>
+                    </div>
+                </div>
+
+                {% if deployment_url %}
+                <div class="info-item">
+                    <div class="label">Deployment URL</div>
+                    <div class="value">
+                        <a href="{{ deployment_url }}" target="_blank">{{ deployment_url }} →</a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tab Content: Environment -->
+        <div id="environment" class="tab-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="icon">🔧</span>
+                        Environment Variables
+                    </h2>
+                </div>
+
+                {% if env_ids %}
+                <div class="env-list">
+                    {% for env in env_ids %}
+                    <div class="env-item">
+                        <form action="{% url 'update_env' env.id %}" method="post" class="env-form">
+                            {% csrf_token %}
+                            <input type="text" name="key" value="{{ env.key }}" class="form-input" placeholder="KEY" required>
+                            <input type="text" name="value" value="{{ env.value }}" class="form-input" placeholder="Value" required>
+                            <select name="service" class="form-select">
+                                <option value="service" {% if env.service == 'service' %}selected{% endif %}>Service</option>
+                                <option value="database" {% if env.service == 'database' %}selected{% endif %}>Database</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">💾 Update</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>No environment variables configured yet</p>
+                </div>
+                {% endif %}
+
+                <div class="add-env-card">
+                    <h3>➕ Add New Environment Variable</h3>
+                    <form action="{% url 'add_env' organization.id %}" method="post">
+                        {% csrf_token %}
+                        {{ env_form.as_p }}
+                        <button type="submit" class="btn btn-primary">Add Variable</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Settings -->
+        <div id="settings" class="tab-content">
+            <div class="danger-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="icon">⚠️</span>
+                        Danger Zone
+                    </h2>
+                </div>
+                <div class="warning-box">
+                    <p>
+                        <span>⚠️</span>
+                        <span>
+                            <strong>Warning:</strong> This action cannot be undone. Deleting this organization will permanently remove all associated data, deployments, environment variables, and configurations from the system.
+                        </span>
+                    </p>
+                </div>
+                <form action="{% url 'delete_organization' organization.id %}" method="post" onsubmit="return confirmDelete()">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">🗑️ Delete Organization</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Tab Switching
+        function switchTab(event, tabId) {
+            // Remove active class from all tabs and content
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding content
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Check Deployment Status
+        function checkDeploymentStatus(organizationId) {
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.classList.add('loading');
+            button.innerHTML = '⏳ Checking...';
+            
+            fetch(`/deployment_status/${organizationId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    showToast(`Deployment Status: ${data.status}`, 'success');
+                    document.getElementById('statusBadge').textContent = data.status;
+                    button.classList.remove('loading');
+                    button.innerHTML = originalText;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error checking deployment status', 'error');
+                    button.classList.remove('loading');
+                    button.innerHTML = originalText;
+                });
+        }
+
+        // Confirm Delete
+        function confirmDelete() {
+            return confirm('⚠️ Are you absolutely sure?\n\nThis will permanently delete:\n• All organization data\n• All deployments\n• All environment variables\n• All configurations\n\nThis action CANNOT be undone.');
+        }
+
+        // Show Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Form Submission Feedback
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.classList.contains('btn-danger')) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.classList.add('loading');
+                    submitBtn.innerHTML = '💾 Saving...';
+                }
+            });
+        });
+
+        // Style form fields in add env section
+        document.addEventListener('DOMContentLoaded', function() {
+            const addEnvForm = document.querySelector('.add-env-card form');
+            if (addEnvForm) {
+                addEnvForm.querySelectorAll('input, select').forEach(field => {
+                    field.classList.add('form-input');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
