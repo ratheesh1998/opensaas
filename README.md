@@ -1,6 +1,14 @@
 # OpenSaaS
 
-A Django-based SaaS platform for managing organizations and deploying services on [Railway](https://railway.app). The app supports superuser-only login, organization management, and automated deployment of services (including Postgres) via the Railway API.
+A Django-based SaaS platform for deploying and managing SaaS instances on [Railway](https://railway.app). Create deployment templates, spin up organizations, and manage environment variables—all from a single dashboard.
+
+## Features
+
+- **Landing page** – Public homepage for new visitors
+- **Deployment templates** – Define services and env vars per template
+- **Organization management** – Deploy instances from templates
+- **Environment variables** – Add, update, and delete per service
+- **Superuser-only access** – Secure login for administrators
 
 ---
 
@@ -71,16 +79,20 @@ Enter:
 
 ### 6. Add Railway credentials
 
-Railway integration uses credentials stored in the database (Django admin).
+Railway integration uses credentials stored in the database. You can add them via:
 
-1. Start the development server:
+**Option A – Settings modal (recommended)**
+
+1. Start the dev server and open **http://127.0.0.1:8000/**:
    ```bash
    python manage.py runserver
    ```
-2. Open the admin: **http://127.0.0.1:8000/admin/**
-3. Log in with your superuser account.
-4. Under **Admin app** → **Creadentials**, click **Add Creadentials** (or edit the existing one).
-5. Fill in:
+2. Click **Get Started** and log in
+3. Click the **Settings** button in the dashboard navbar
+4. Fill in Railway auth token, workspace ID, and template ID
+5. Save
+
+**Option B – Django admin:** Open **http://127.0.0.1:8000/admin/**, go to **Admin app** → **Creadentials**. Fill in:
 
    | Field                  | Description |
    |------------------------|-------------|
@@ -90,21 +102,30 @@ Railway integration uses credentials stored in the database (Django admin).
 
 6. Save. The app uses the **first** credentials record for all Railway API calls.
 
-**Where to get these values:**
-
-- **Auth token:** [Railway → Account → Tokens](https://railway.app/account/tokens) → Create token.
-- **Workspace ID:** In Railway, open your team/workspace; the ID often appears in the URL or in project/workspace settings.
-- **Template ID:** From the template you want to use for deployments (e.g. in the template’s URL or API response).
-
 ### 7. Run the app
 
 ```bash
 python manage.py runserver
 ```
 
-- **App (login):** http://127.0.0.1:8000/  
-- **Login page:** http://127.0.0.1:8000/user/login/  
-- **Django admin:** http://127.0.0.1:8000/admin/
+| URL | Description |
+|-----|-------------|
+| http://127.0.0.1:8000/ | Homepage (landing page) |
+| http://127.0.0.1:8000/app/ | Dashboard (requires login) |
+| http://127.0.0.1:8000/user/login/ | Sign in |
+| http://127.0.0.1:8000/admin_app/settings/template-list/ | Deployment templates |
+| http://127.0.0.1:8000/admin/ | Django admin |
+
+---
+
+## Migrations
+
+Migration files are ignored via `.gitignore`. After cloning:
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
 ---
 
@@ -116,13 +137,13 @@ The project uses `python-dotenv` and loads a `.env` file from the project root i
 
 ## Project structure
 
-| Path              | Description |
-|-------------------|-------------|
-| `opensaas/`       | Django project settings and root URL config. |
-| `admin_app/`      | Credentials model and admin for Railway auth/template/workspace. |
-| `organization/`   | Organizations, projects, services, Railway API (`railway.py`), and deployment logic. |
-| `user_management/`| Superuser login and auth views. |
-| `templates/`      | Shared templates (login, modals, list/detail views). |
+| Path               | Description |
+|--------------------|-------------|
+| `opensaas/`        | Django project settings and root URL config |
+| `admin_app/`       | Credentials, deployment templates, services, environment variables |
+| `organization/`    | Organizations, projects, Railway API (`railway.py`), deployment logic |
+| `user_management/` | Superuser login and auth views |
+| `templates/`       | Homepage, login, dashboard, modals, list/detail views |
 
 ---
 

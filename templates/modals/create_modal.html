@@ -240,8 +240,7 @@
         form input[type="number"],
         form input[type="url"],
         form input[type="tel"],
-        form textarea,
-        form select {
+        form textarea {
             width: 100%;
             padding: 14px 16px;
             background: var(--surface-elevated);
@@ -259,8 +258,7 @@
         form input[type="number"]:focus,
         form input[type="url"]:focus,
         form input[type="tel"]:focus,
-        form textarea:focus,
-        form select:focus {
+        form textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -273,8 +271,183 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        form select {
+        /* Hide original select elements */
+        select.card-select-hidden {
+            display: none !important;
+        }
+
+        /* ─── Card Select: horizontal card grid ─── */
+        .card-select-wrapper {
+            width: 100%;
+        }
+
+        /* The grid of clickable cards */
+        .card-select-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        /* Individual option card — matches screenshot style */
+        .card-option {
+            background: var(--surface-elevated);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 24px 16px 20px;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px;
+            position: relative;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+            user-select: none;
+        }
+
+        .card-option:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.06);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-option.selected {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.08);
+            box-shadow: 0 0 0 1px var(--primary), 0 6px 20px rgba(37, 99, 235, 0.2);
+        }
+
+        .card-option.hidden {
+            display: none;
+        }
+
+        /* Top-right checkmark — only visible when selected */
+        .card-option-check {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: white;
+            font-weight: 700;
+            opacity: 0;
+            transform: scale(0.6);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .card-option.selected .card-option-check {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Circular icon bubble */
+        .card-option-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.18));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .card-option:hover .card-option-icon {
+            transform: scale(1.08);
+        }
+
+        .card-option.selected .card-option-icon {
+            background: linear-gradient(135deg, rgba(37,99,235,0.25), rgba(139,92,246,0.25));
+        }
+
+        /* Title */
+        .card-option-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        /* Sub-description / ID */
+        .card-option-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* "None" option — slim row above grid */
+        .card-option-none {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            margin-bottom: 10px;
+            border-radius: 20px;
+            border: 1px dashed var(--border);
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: border-color 0.15s, color 0.15s, background 0.15s;
+            font-style: italic;
+        }
+
+        .card-option-none:hover {
+            border-color: var(--primary);
+            color: var(--text-secondary);
+            background: rgba(37,99,235,0.05);
+        }
+
+        .card-option-none.selected {
+            border-color: var(--primary);
+            color: var(--primary-light);
+            background: rgba(37,99,235,0.08);
+        }
+
+        /* Empty search state */
+        .card-select-empty {
+            padding: 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            display: none;
+            grid-column: 1 / -1;
+        }
+
+        .card-select-empty.visible {
+            display: block;
+        }
+
+        /* Optional search bar above the grid */
+        .card-select-search {
+            margin-bottom: 12px;
+        }
+
+        .card-select-search input {
+            width: 100%;
+            padding: 9px 14px;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-family: 'Sora', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .card-select-search input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
         }
 
         /* Help Text */
@@ -449,27 +622,13 @@
             max-width: 400px;
         }
 
-        .toast.show {
-            display: block;
-        }
-
-        .toast.success {
-            border-color: var(--success);
-        }
-
-        .toast.error {
-            border-color: var(--danger);
-        }
+        .toast.show { display: block; }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--danger); }
 
         @keyframes slideUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(100px); opacity: 0; }
+            to   { transform: translateY(0);    opacity: 1; }
         }
 
         /* Progress Steps */
@@ -537,46 +696,17 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .main-container {
-                padding: 20px;
-            }
-
-            .navbar-content {
-                padding: 0 20px;
-            }
-
-            .header-card {
-                padding: 28px;
-            }
-
-            .header-card h1 {
-                font-size: 28px;
-            }
-
-            .form-card {
-                padding: 28px 24px;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .progress-steps {
-                overflow-x: auto;
-                padding-bottom: 10px;
-            }
-
-            .step {
-                min-width: 100px;
-            }
+            .main-container { padding: 20px; }
+            .navbar-content { padding: 0 20px; }
+            .header-card { padding: 28px; }
+            .header-card h1 { font-size: 28px; }
+            .form-card { padding: 28px 24px; }
+            .form-actions { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .progress-steps { overflow-x: auto; padding-bottom: 10px; }
+            .step { min-width: 100px; }
         }
 
-        /* Checkbox and Radio Styles */
         input[type="checkbox"],
         input[type="radio"] {
             width: 20px;
@@ -585,7 +715,6 @@
             accent-color: var(--primary);
         }
 
-        /* File Input */
         input[type="file"] {
             padding: 12px;
             background: var(--surface-elevated);
@@ -614,9 +743,7 @@
                 </div>
             </div>
             <div class="navbar-actions">
-                <a href="{% url 'list_organization' %}" class="back-link">
-                    ← Back to List
-                </a>
+                <a href="{% url 'list_organization' %}" class="back-link">← Back to List</a>
                 <a href="{% url 'superuser_logout' %}" class="btn btn-secondary" title="Log out">Log out</a>
             </div>
         </div>
@@ -658,8 +785,6 @@
                 Make sure you have the following information ready:
                 <ul>
                     <li>Organization name</li>
-                    <li>Docker image repository and tag</li>
-                    <li>Database configuration details</li>
                 </ul>
             </div>
         </div>
@@ -673,137 +798,255 @@
 
             <form action="{% url 'create_organization' %}" method="post" id="createOrgForm">
                 {% csrf_token %}
-                
                 {{ form.as_ul }}
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" id="submitBtn">
                         🚀 Create Organization
                     </button>
-                    <a href="{% url 'list_organization' %}" class="btn btn-secondary">
-                        Cancel
-                    </a>
+                    <a href="{% url 'list_organization' %}" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
     <script>
-        // Form Submission Handling
-        const form = document.getElementById('createOrgForm');
-        const submitBtn = document.getElementById('submitBtn');
+    // ─────────────────────────────────────────────
+    //  Card-Select: replaces <select> elements with
+    //  a clickable card dropdown UI
+    // ─────────────────────────────────────────────
 
-        form.addEventListener('submit', function(e) {
-            // Add loading state
-            submitBtn.classList.add('loading');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '⏳ Creating...';
+    const CARD_ICONS = {
+        default:    '📦',
+        template:   '🗂️',
+        project:    '🏗️',
+        deployment: '🚀',
+        db:         '🛢️',
+    };
 
-            // Form will submit normally, this just provides visual feedback
-        });
+    /**
+     * Detect which icon to use for an option based on heuristics in its text.
+     */
+    function getOptionIcon(text) {
+        const t = text.toLowerCase();
+        if (t.includes('template') || t.includes('deploy')) return CARD_ICONS.deployment;
+        if (t.includes('project'))  return CARD_ICONS.project;
+        if (t.includes('db') || t.includes('database')) return CARD_ICONS.db;
+        return CARD_ICONS.default;
+    }
 
-        // Add required asterisk to labels
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
-                const label = field.closest('li').querySelector('label');
-                if (label && !label.querySelector('.required')) {
-                    label.innerHTML += ' <span class="required">*</span>';
-                }
-            });
+    /**
+     * Build a card-select widget (grid of clickable cards) that wraps a native <select>.
+     * The native select is hidden but stays in the DOM so Django can read it.
+     * Matches the screenshot: horizontal cards, circular icon, bold title, ID below, top-right checkmark.
+     */
+    function buildCardSelect(selectEl) {
+        const fieldName  = selectEl.name || selectEl.id;
+        const humanLabel = fieldName
+            .replace(/_id$/, '')
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, c => c.toUpperCase());
 
-            // Style the form fields
-            document.querySelectorAll('form ul li').forEach(li => {
-                // Move error messages after the input
-                const errorList = li.querySelector('.errorlist');
-                const input = li.querySelector('input, select, textarea');
-                
-                if (errorList && input) {
-                    input.parentNode.insertBefore(errorList, input.nextSibling);
-                }
+        const hasNullOption = [...selectEl.options].some(o => o.value === '' || o.value === 'None');
 
-                // Move help text after the input
-                const helpText = li.querySelector('.helptext');
-                const inputField = li.querySelector('input, select, textarea');
-                
-                if (helpText && inputField) {
-                    inputField.parentNode.insertBefore(helpText, inputField.nextSibling);
-                }
-            });
+        // Outer wrapper
+        const wrapper = document.createElement('div');
+        wrapper.className = 'card-select-wrapper';
+        wrapper.setAttribute('data-field', fieldName);
 
-            // Add focus effect to form fields
-            const formFields = document.querySelectorAll('input, select, textarea');
-            formFields.forEach(field => {
-                field.addEventListener('focus', function() {
-                    this.closest('li').style.transform = 'scale(1.01)';
-                    this.closest('li').style.transition = 'transform 0.2s ease';
-                });
-
-                field.addEventListener('blur', function() {
-                    this.closest('li').style.transform = 'scale(1)';
-                });
-            });
-        });
-
-        // Show toast message
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type} show`;
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+        // ── Search bar (only if > 4 options) ───────────────────
+        const realOptions = [...selectEl.options].filter(o => o.value && o.value !== 'None');
+        if (realOptions.length > 4) {
+            const searchWrap = document.createElement('div');
+            searchWrap.className = 'card-select-search';
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = `Search ${humanLabel}…`;
+            searchInput.setAttribute('aria-label', `Search ${humanLabel}`);
+            searchInput.addEventListener('input', () => filterCards(searchInput.value));
+            searchWrap.appendChild(searchInput);
+            wrapper.appendChild(searchWrap);
         }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + S to submit
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                form.submit();
-            }
+        // ── "None" pill (for nullable FK fields) ───────────────
+        if (hasNullOption) {
+            const nonePill = document.createElement('div');
+            nonePill.className = 'card-option-none';
+            nonePill.setAttribute('data-value', '');
+            nonePill.setAttribute('role', 'option');
+            nonePill.innerHTML = `<span>⊘</span> None / Not selected`;
+            nonePill.addEventListener('click', () => selectOption('', ''));
+            wrapper.appendChild(nonePill);
+        }
 
-            // Escape to cancel
-            if (e.key === 'Escape') {
-                if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
-                    window.location.href = "{% url 'list_organization' %}";
-                }
+        // ── Card grid ───────────────────────────────────────────
+        const grid = document.createElement('div');
+        grid.className = 'card-select-grid';
+        grid.setAttribute('role', 'listbox');
+
+        const empty = document.createElement('div');
+        empty.className = 'card-select-empty';
+        empty.textContent = 'No options found';
+        grid.appendChild(empty);
+
+        realOptions.forEach(opt => {
+            const icon = getOptionIcon(opt.text);
+            const card = document.createElement('div');
+            card.className = 'card-option';
+            card.setAttribute('data-value', opt.value);
+            card.setAttribute('data-label', opt.text);
+            card.setAttribute('role', 'option');
+            card.setAttribute('tabindex', '0');
+            card.innerHTML = `
+                <div class="card-option-check">✓</div>
+                <div class="card-option-icon">${icon}</div>
+                <div class="card-option-name">${opt.text}</div>
+            `;
+            card.addEventListener('click', () => selectOption(opt.value, opt.text));
+            card.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectOption(opt.value, opt.text); }
+            });
+            grid.appendChild(card);
+        });
+
+        wrapper.appendChild(grid);
+
+        // ── State helpers ────────────────────────────────────────
+
+        function selectOption(value, label) {
+            // Sync native select so Django receives the value
+            selectEl.value = value;
+
+            // Update card selected states
+            grid.querySelectorAll('.card-option').forEach(c => {
+                c.classList.toggle('selected', c.dataset.value === value);
+                c.setAttribute('aria-selected', c.dataset.value === value);
+            });
+
+            // Update none pill
+            const nonePill = wrapper.querySelector('.card-option-none');
+            if (nonePill) nonePill.classList.toggle('selected', value === '');
+        }
+
+        function filterCards(query) {
+            const q = query.toLowerCase().trim();
+            let visible = 0;
+            grid.querySelectorAll('.card-option').forEach(card => {
+                const match = card.dataset.label.toLowerCase().includes(q)
+                           || card.dataset.value.toLowerCase().includes(q);
+                card.classList.toggle('hidden', !match);
+                if (match) visible++;
+            });
+            empty.classList.toggle('visible', visible === 0);
+        }
+
+        // Pre-select if native select already has a value
+        const currentOpt = selectEl.options[selectEl.selectedIndex];
+        if (currentOpt && currentOpt.value && currentOpt.value !== 'None') {
+            selectOption(currentOpt.value, currentOpt.text);
+        } else if (hasNullOption) {
+            const nonePill = wrapper.querySelector('.card-option-none');
+            if (nonePill) nonePill.classList.add('selected');
+        }
+
+        return wrapper;
+    }
+
+    // ─────────────────────────────────────────────
+    //  Init: replace all <select> inside the form
+    // ─────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('createOrgForm');
+
+        form.querySelectorAll('select').forEach(selectEl => {
+            // Build the card UI
+            const widget = buildCardSelect(selectEl);
+
+            // Hide the original select
+            selectEl.classList.add('card-select-hidden');
+
+            // Insert the widget right after the select
+            selectEl.parentNode.insertBefore(widget, selectEl.nextSibling);
+        });
+
+        // ── Existing DOMContentLoaded logic ─────────────────────
+
+        // Required asterisks
+        document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
+            const label = field.closest('li')?.querySelector('label');
+            if (label && !label.querySelector('.required')) {
+                label.innerHTML += ' <span class="required">*</span>';
             }
         });
 
-        // Auto-save to localStorage (optional)
-        const autoSaveKey = 'org_form_autosave';
-        
-        // Save form data on input
-        document.querySelectorAll('input, select, textarea').forEach(field => {
-            field.addEventListener('input', function() {
-                const formData = new FormData(form);
-                const data = Object.fromEntries(formData);
-                localStorage.setItem(autoSaveKey, JSON.stringify(data));
+        // Move error/help text after input
+        document.querySelectorAll('form ul li').forEach(li => {
+            const errorList = li.querySelector('.errorlist');
+            const input     = li.querySelector('input, textarea');
+            if (errorList && input) input.parentNode.insertBefore(errorList, input.nextSibling);
+
+            const helpText   = li.querySelector('.helptext');
+            const inputField = li.querySelector('input, textarea');
+            if (helpText && inputField) inputField.parentNode.insertBefore(helpText, inputField.nextSibling);
+        });
+
+        // Focus effect on text fields
+        document.querySelectorAll('input, textarea').forEach(field => {
+            field.addEventListener('focus', function() {
+                this.closest('li').style.transform  = 'scale(1.01)';
+                this.closest('li').style.transition = 'transform 0.2s ease';
+            });
+            field.addEventListener('blur', function() {
+                this.closest('li').style.transform = 'scale(1)';
             });
         });
 
-        // Restore form data on load (optional)
-        window.addEventListener('load', function() {
-            const savedData = localStorage.getItem(autoSaveKey);
-            if (savedData && confirm('Restore previously entered data?')) {
-                const data = JSON.parse(savedData);
-                Object.keys(data).forEach(key => {
-                    const field = form.elements[key];
-                    if (field) {
-                        field.value = data[key];
-                    }
-                });
-            }
-        });
+      
+    });
 
-        // Clear autosave on successful submission
-        form.addEventListener('submit', function() {
-            localStorage.removeItem(autoSaveKey);
+    // ─────────────────────────────────────────────
+    //  Form submission
+    // ─────────────────────────────────────────────
+    const form      = document.getElementById('createOrgForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function() {
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '⏳ Creating...';
+        localStorage.removeItem('org_form_autosave');
+    });
+
+    // Auto-save on input
+    document.querySelectorAll('input, select, textarea').forEach(field => {
+        field.addEventListener('input', function() {
+            const formData = new FormData(form);
+            localStorage.setItem('org_form_autosave', JSON.stringify(Object.fromEntries(formData)));
         });
+    });
+
+    // Toast helper
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            form.submit();
+        }
+        if (e.key === 'Escape') {
+            if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+                window.location.href = "{% url 'list_organization' %}";
+            }
+        }
+    });
     </script>
 </body>
 </html>

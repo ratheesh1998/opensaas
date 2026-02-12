@@ -5,12 +5,19 @@ from django.core.paginator import Paginator
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from admin_app.forms import CreadentialsForm
-from admin_app.models import Creadentials
+from admin_app.models import Creadentials, DeploymentTemplate, Project
 from organization.forms import EnvForm, OrganizationForm
-from organization.models import Env, Organization, Project, Service
+from organization.models import Env, Organization, Service
 from organization.railway import  delete_organization, deploy_to_railway, deployment_status, project_create, update_service_id, update_service_variable, update_service_variable
 
 # Create your views here.
+
+
+class HomePageView(View):
+    """Landing page for new visitors."""
+
+    def get(self, request):
+        return render(request, 'pages/home.html')
 
 
 class CreateOrganizationView(LoginRequiredMixin, View):
@@ -28,19 +35,16 @@ class CreateOrganizationView(LoginRequiredMixin, View):
                 project_id.save()
             organization.project_id = Project.objects.first()
             organization.default_domain = f"https://{request.POST.get('name')}-opensaas-production.up.railway.app"
+            organization.save()
             project_id = Project.objects.first()
             if not project_id:
                 return render(request, 'modals/create_modal.html', {'form': form, 'error': 'Failed to create or retrieve project'})
             workflow_id = deploy_to_railway(
+                template_id=organization.deployment_template_id,
                 service_name=request.POST.get('name'),
-                service_image=request.POST.get('docker_image'),    
-                project_id=project_id.project_id,
-                environment_id=project_id.environment_id
-            ) 
-            organization.workflow_id = workflow_id
-            organization.save()
+            )
             return redirect('list_organization')
-        from django.views import View
+        return render(request, 'modals/create_modal.html', {'form': form})
 
 class ListOrganizationView(LoginRequiredMixin, View):
 

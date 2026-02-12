@@ -1,18 +1,36 @@
 
-
-
 from django import forms
 
+from admin_app.models import DeploymentTemplate, TemplateService
 from organization.models import Env, Organization
 
 
 class OrganizationForm(forms.ModelForm):
-    docker_image = forms.CharField(max_length=100, label='Docker Image')
-    database_name = forms.ChoiceField( label='Database Name',choices=[('postgres', 'Postgres'), ('mysql', 'MySQL')])
+    # Dropdown shows services (TemplateService); deployment_template_id is set from selected service's template on save
+    service = forms.ModelChoiceField(
+        queryset=DeploymentTemplate.objects.filter(published=True),
+        label='Service',
+        required=True,
+        empty_label='Select a service',
+    )
 
     class Meta:
         model = Organization
-        fields = ['name','docker_image', 'database_name']
+        fields = ['name']
+        # deployment_template_id is set in save() from the selected service
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['service'].queryset = DeploymentTemplate.objects.filter(published=True)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        service = self.cleaned_data.get('service')
+        if service:
+            instance.deployment_template_id = service
+        if commit:
+            instance.save()
+        return instance
 
 
 class EnvForm(forms.ModelForm):

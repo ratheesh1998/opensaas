@@ -51,7 +51,7 @@ class SuperUserLogoutView(View):
     def get(self, request):
         logout(request)
         messages.info(request, 'You have been logged out.')
-        return redirect('superuser_login')
+        return redirect('home')
 
     def post(self, request):
         return self.get(request)

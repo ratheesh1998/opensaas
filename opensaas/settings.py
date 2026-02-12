@@ -42,13 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'organization',
-    'admin_app',
+    'admin_app',git 
     'user_management',
+    
 ]
 
 # Login (superuser-only) redirect
 LOGIN_URL = '/user/login/'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/app/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

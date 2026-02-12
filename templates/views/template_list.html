@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizations - Dashboard</title>
+    <title>Deployment Templates - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * {
@@ -38,7 +38,6 @@
             min-height: 100vh;
         }
 
-        /* Navbar */
         .navbar {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -60,6 +59,14 @@
         }
 
         .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .navbar-brand a {
+            text-decoration: none;
+            color: inherit;
             display: flex;
             align-items: center;
             gap: 16px;
@@ -102,14 +109,12 @@
             align-items: center;
         }
 
-        /* Main Container */
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 32px;
         }
 
-        /* Header Section */
         .page-header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border-radius: 20px;
@@ -148,7 +153,6 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Search and Actions Bar */
         .action-bar {
             display: flex;
             gap: 16px;
@@ -243,7 +247,6 @@
             border-color: var(--primary);
         }
 
-        /* Stats Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -293,7 +296,6 @@
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Organization Grid */
         .org-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -370,6 +372,12 @@
             letter-spacing: 0.5px;
         }
 
+        .org-badge.draft {
+            background: rgba(100, 116, 139, 0.1);
+            border-color: rgba(100, 116, 139, 0.3);
+            color: var(--text-muted);
+        }
+
         .org-name {
             font-size: 20px;
             font-weight: 600;
@@ -405,6 +413,16 @@
             white-space: nowrap;
         }
 
+        .org-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .org-arrow {
             position: absolute;
             bottom: 24px;
@@ -419,7 +437,6 @@
             transform: translateX(4px);
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -445,7 +462,6 @@
             margin-bottom: 24px;
         }
 
-        /* Pagination */
         .pagination {
             display: flex;
             align-items: center;
@@ -489,72 +505,6 @@
             color: var(--text-secondary);
         }
 
-        /* Loading State */
-        .loading-skeleton {
-            background: linear-gradient(90deg, var(--surface) 25%, var(--surface-elevated) 50%, var(--surface) 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-            border-radius: 8px;
-            height: 20px;
-        }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .org-grid {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 20px;
-            }
-
-            .navbar-content {
-                padding: 0 20px;
-            }
-
-            .page-header {
-                padding: 28px;
-            }
-
-            .page-header h1 {
-                font-size: 28px;
-            }
-
-            .action-bar {
-                flex-direction: column;
-            }
-
-            .search-form {
-                min-width: 100%;
-            }
-
-            .org-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .pagination {
-                gap: 8px;
-            }
-
-            .pagination a,
-            .pagination span {
-                padding: 8px 14px;
-                font-size: 13px;
-            }
-        }
-
-        /* Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -577,23 +527,6 @@
         .org-card:nth-child(5) { animation-delay: 0.25s; }
         .org-card:nth-child(6) { animation-delay: 0.3s; }
 
-        /* Utility */
-        .nav-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        .nav-link:hover {
-            color: var(--primary);
-            background: rgba(37, 99, 235, 0.1);
-        }
-        .nav-link.active {
-            color: var(--primary);
-        }
         .btn-icon {
             width: 40px;
             height: 40px;
@@ -602,7 +535,7 @@
             align-items: center;
             justify-content: center;
         }
-        /* Modal Styles */
+
         .modal {
             display: none;
             position: fixed;
@@ -643,11 +576,6 @@
             flex-direction: column;
             animation: slideUp 0.3s ease;
             overflow: hidden;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         @keyframes slideUp {
@@ -719,24 +647,6 @@
             flex: 1;
         }
 
-        .modal-body::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: var(--surface-elevated);
-            border-radius: 4px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
-        }
-
         .modal-body form ul {
             list-style: none;
             display: flex;
@@ -757,21 +667,9 @@
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .modal-body form label .required {
-            color: var(--danger);
         }
 
         .modal-body form input[type="text"],
-        .modal-body form input[type="email"],
-        .modal-body form input[type="password"],
-        .modal-body form input[type="number"],
-        .modal-body form input[type="url"],
-        .modal-body form input[type="tel"],
         .modal-body form textarea,
         .modal-body form select {
             width: 100%;
@@ -791,31 +689,27 @@
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            background: var(--surface);
         }
 
         .modal-body form textarea {
             min-height: 100px;
             resize: vertical;
-            font-family: 'JetBrains Mono', monospace;
         }
 
         .modal-body form select {
             cursor: pointer;
         }
 
-        .modal-body .helptext {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: start;
-            gap: 6px;
-            line-height: 1.5;
+        .modal-body form input[type="checkbox"] {
+            width: auto;
+            accent-color: var(--primary);
+            cursor: pointer;
         }
 
-        .modal-body .helptext::before {
-            content: '💡';
-            font-size: 13px;
+        .modal-body form li:has(input[type="checkbox"]) {
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
         }
 
         .modal-body .errorlist {
@@ -829,16 +723,6 @@
             font-size: 13px;
         }
 
-        .modal-body .errorlist li {
-            display: flex;
-            align-items: start;
-            gap: 8px;
-        }
-
-        .modal-body .errorlist li::before {
-            content: '⚠️';
-        }
-
         .modal-actions {
             display: flex;
             gap: 12px;
@@ -850,41 +734,48 @@
             flex: 1;
         }
 
-        @media (max-width: 768px) {
-            .modal-container {
-                width: 95%;
-                max-height: 90vh;
-                border-radius: 16px;
-            }
-
-            .modal-header {
-                padding: 20px;
-            }
-
-            .modal-title {
-                font-size: 18px;
-            }
-
-            .modal-body {
-                padding: 24px 20px;
-            }
-
-            .modal-actions {
-                flex-direction: column;
-            }
-        }
-
         body.modal-open {
             overflow: hidden;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .main-container { padding: 20px; }
+            .navbar-content { padding: 0 20px; }
+            .page-header { padding: 28px; }
+            .page-header h1 { font-size: 28px; }
+            .action-bar { flex-direction: column; }
+            .search-form { min-width: 100%; }
+            .org-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .pagination { gap: 8px; }
+            .pagination a, .pagination span { padding: 8px 14px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
-    <!-- Navbar -->
     <nav class="navbar">
         <div class="navbar-content">
             <div class="navbar-brand">
-                <a href="{% url 'list_organization' %}" style="display: flex; align-items: center; gap: 16px; text-decoration: none; color: inherit;">
+                <a href="{% url 'list_organization' %}">
                     <div class="logo">S</div>
                     <div class="brand-text">
                         <span class="title">SaaS Manager</span>
@@ -893,78 +784,73 @@
                 </a>
             </div>
             <div class="navbar-actions">
-                <a href="{% url 'list_organization' %}" class="nav-link active">Organizations</a>
-                <a href="{% url 'template_list' %}" class="nav-link">Templates</a>
-                <button class="btn btn-secondary btn-icon" title="Settings" onclick="openSettingsModal()">⚙️</button>
+                <a href="{% url 'list_organization' %}" class="nav-link">Organizations</a>
+                <a href="{% url 'template_list' %}" class="nav-link active">Templates</a>
                 <a href="{% url 'superuser_logout' %}" class="btn btn-secondary" title="Log out">Log out</a>
-           </div>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Container -->
     <div class="main-container">
-        <!-- Page Header -->
         <div class="page-header">
             <div class="header-content">
-                <h1>Organizations</h1>
-                <p class="description">Manage and monitor all your SaaS instances in one place</p>
+                <h1>Deployment Templates</h1>
+                <p class="description">Create and manage deployment templates for your SaaS instances</p>
             </div>
         </div>
 
-        <!-- Stats Grid -->
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="icon">🏢</div>
-                <div class="label">Total Organizations</div>
+                <div class="icon">📄</div>
+                <div class="label">Total Templates</div>
                 <div class="value">{{ page_obj.paginator.count }}</div>
             </div>
             <div class="stat-card">
                 <div class="icon">🚀</div>
-                <div class="label">Active Deployments</div>
-                <div class="value">{{ page_obj.paginator.count }}</div>
+                <div class="label">Published</div>
+                <div class="value">{{ published_count|default:0 }}</div>
             </div>
             <div class="stat-card">
-                <div class="icon">📄</div>
+                <div class="icon">📑</div>
                 <div class="label">Current Page</div>
                 <div class="value">{{ page_obj.number }}</div>
             </div>
         </div>
 
-        <!-- Action Bar -->
         <div class="action-bar">
-            <form action="{% url 'list_organization' %}" method="get" class="search-form">
-                <input 
-                    type="text" 
-                    name="search" 
-                    placeholder="Search organizations..." 
+            <form action="{% url 'template_list' %}" method="get" class="search-form">
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search templates..."
                     class="search-input"
                     value="{{ search|default:'' }}"
                 >
                 <button type="submit" class="search-btn">🔍 Search</button>
             </form>
-            <a href="{% url 'create_organization' %}" class="btn btn-primary">
-                ➕ Create Organization
-            </a>
+            <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+                ➕ Create Template
+            </button>
         </div>
 
-        <!-- Organizations Grid -->
         {% if page_obj %}
         <div class="org-grid">
-            {% for organization in page_obj %}
-            <a href="{% url 'detailed_organization' id=organization.id %}" class="org-card">
+            {% for template in page_obj %}
+            <a href="{% url 'template_detailed_view' pk=template.pk %}" class="org-card">
                 <div class="org-card-header">
-                    <div class="org-icon">{{ organization.name|first|upper }}</div>
-                    <span class="org-badge">Active</span>
+                    <div class="org-icon">{{ template.name|slice:":1"|upper }}</div>
+                    <span class="org-badge {% if not template.published %}draft{% endif %}">
+                        {% if template.published %}Published{% else %}Draft{% endif %}
+                    </span>
                 </div>
-                <h3 class="org-name">{{ organization.name }}</h3>
+                <h3 class="org-name">{{ template.name }}</h3>
+                {% if template.description %}
+                <p class="org-description">{{ template.description|truncatewords:20 }}</p>
+                {% endif %}
                 <div class="org-details">
                     <div class="detail-item">
-                        <span class="label">🐳 Docker Image:</span>
-                        <span class="value">{{ organization.docker_image }}</span>
-                    </div>
-                    <div class="detail-item">
-                        <span class="label">💾 Database:</span>
-                        <span class="value">{{ organization.database_name }}</span>
+                        <span class="label">🔧 Services:</span>
+                        <span class="value">{{ template.templateservice_set.count }}</span>
                     </div>
                 </div>
                 <span class="org-arrow">→</span>
@@ -973,27 +859,24 @@
         </div>
         {% else %}
         <div class="empty-state">
-            <div class="icon">📭</div>
-            <h3>No Organizations Found</h3>
-            <p>Start by creating your first organization</p>
-            <a href="{% url 'create_organization' %}" class="btn btn-primary">
-                ➕ Create Your First Organization
-            </a>
+            <div class="icon">📄</div>
+            <h3>No Templates Found</h3>
+            <p>Create your first deployment template to get started</p>
+            <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+                ➕ Create Your First Template
+            </button>
         </div>
         {% endif %}
 
-        <!-- Pagination -->
         {% if page_obj.paginator.num_pages > 1 %}
         <div class="pagination">
             {% if page_obj.has_previous %}
                 <a href="?page=1&search={{ search }}">⏮️ First</a>
                 <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}">← Previous</a>
             {% endif %}
-
             <span class="page-info">
                 Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
-
             {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}&search={{ search }}">Next →</a>
                 <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search }}">Last ⏭️</a>
@@ -1001,122 +884,52 @@
         </div>
         {% endif %}
     </div>
-    
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-overlay" onclick="closeSettingsModal()"></div>
+
+    <div id="createTemplateModal" class="modal {% if show_create_modal %}show{% endif %}">
+        <div class="modal-overlay" onclick="closeCreateModal()"></div>
         <div class="modal-container">
             <div class="modal-header">
                 <div class="modal-title-group">
-                    <span class="modal-icon">⚙️</span>
-                    <h2 class="modal-title">Settings & Credentials</h2>
+                    <span class="modal-icon">➕</span>
+                    <h2 class="modal-title">Create Template</h2>
                 </div>
-                <button class="modal-close" onclick="closeSettingsModal()">✕</button>
+                <button class="modal-close" onclick="closeCreateModal()">✕</button>
             </div>
-            
             <div class="modal-body">
-                <form id="credentialsForm" action="{% url 'credentials_form' %}" method="post">
+                <form action="{% url 'template_list' %}" method="post">
                     {% csrf_token %}
-
-                    {{ credentials_form.as_ul }}
-                    
+                    {{ deployment_template_form.as_ul }}
                     <div class="modal-actions">
-                        <button type="submit" class="btn btn-primary" id="saveCredentialsBtn">
-                            💾 Save Credentials
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">
-                            Cancel
-                        </button>
+                        <button type="submit" class="btn btn-primary">💾 Create Template</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <script>
-        // Auto-focus search input if search query exists; open credentials modal if needed
         document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.querySelector('.search-input');
-            const urlParams = new URLSearchParams(window.location.search);
-            
-            if (urlParams.get('search')) {
-                searchInput.focus();
-            }
-            {% if show_credentials_modal %}
-            openSettingsModal();
+            {% if show_create_modal %}
+            openCreateModal();
             {% endif %}
         });
 
-        // Add keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + K to focus search
-            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                e.preventDefault();
-                document.querySelector('.search-input').focus();
-            }
-        });
-
-        // Add loading state to cards
-        document.querySelectorAll('.org-card').forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Visual feedback
-                this.style.opacity = '0.6';
-            });
-        });
-        // Open Settings Modal
-        function openSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            modal.classList.add('show');
+        function openCreateModal() {
+            document.getElementById('createTemplateModal').classList.add('show');
             document.body.classList.add('modal-open');
-            
-            setTimeout(() => {
-                const firstInput = modal.querySelector('input, select, textarea');
-                if (firstInput) {
-                    firstInput.focus();
-                }
-            }, 300);
         }
 
-        // Close Settings Modal
-        function closeSettingsModal() {
-            const modal = document.getElementById('settingsModal');
-            modal.classList.remove('show');
+        function closeCreateModal() {
+            document.getElementById('createTemplateModal').classList.remove('show');
             document.body.classList.remove('modal-open');
         }
 
-        // Close modal on Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                const modal = document.getElementById('settingsModal');
-                if (modal.classList.contains('show')) {
-                    closeSettingsModal();
-                }
-            }
-        });
-
-        // Handle credentials form
-        document.addEventListener('DOMContentLoaded', function() {
-            const credentialsForm = document.getElementById('credentialsForm');
-            const saveBtn = document.getElementById('saveCredentialsBtn');
-            
-            if (credentialsForm) {
-                // Add required asterisks
-                credentialsForm.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
-                    const label = field.closest('li').querySelector('label');
-                    if (label && !label.querySelector('.required')) {
-                        label.innerHTML += ' <span class="required">*</span>';
-                    }
-                });
-
-                credentialsForm.addEventListener('submit', function(e) {
-                    if (saveBtn) {
-                        saveBtn.classList.add('loading');
-                        saveBtn.disabled = true;
-                        saveBtn.innerHTML = '⏳ Saving...';
-                    }
-                });
+                closeCreateModal();
             }
         });
     </script>
-  
 </body>
 </html>

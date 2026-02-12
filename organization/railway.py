@@ -5,10 +5,10 @@ import re
 import time
 from urllib import response
 
-from admin_app.models import Creadentials as Credentials
+from admin_app.models import Creadentials as Credentials, Project, TemplateService
 import requests
 
-from organization.models import Organization, Project, Service
+from organization.models import Organization, Service
 
 try:
     RAILWAY_AUTH_TOKEN =Credentials.objects.first().railway_auth_token
@@ -86,84 +86,70 @@ def project_create(service_name):
     )
     return project_id
 
-def deploy_to_railway(service_name,service_image,project_id,environment_id):
-    CSRF_TRUSTED_ORIGINS = f"https://{service_name}-opensaas-production.up.railway.app"
-    postgres_ref=f"Postgres-{service_name}"
-    mutation = """
-    mutation templateDeployV2($input: TemplateDeployV2Input!) {
-        templateDeployV2(input: $input) {
-            projectId
-            workflowId
-        }
-    }
-    """
+def deploy_to_railway(template_id,service_name):
+    
+    from django.db.models import Prefetch
 
+    services_qs = TemplateService.objects.filter(
+        deployment_template=template_id
+    ).prefetch_related(
+        Prefetch("environment_set")
+    )
+    project_id = template_id.project_id.project_id
+    environment_id = template_id.project_id.environment_id
+    services_payload = {}
+
+    for service in services_qs:
+        service_key = f"service_{service.id}"
+
+        # Build env vars from Environment table
+        env_vars = {}
+        for env in service.environment_set.all():
+            env_vars[env.name] = {"value": env.value}
+
+        # Add common variables
+        env_vars["CSRF_TRUSTED_ORIGINS"] = {
+            "value": f"https://{service.name}-opensaas-production.up.railway.app"
+        }
+
+        # Reference postgres DATABASE_URL
+        postgres_ref = f"Postgres-{service_name}"
+        env_vars["DATABASE_URL"] = {
+            "value": f"${{{{{postgres_ref}.DATABASE_URL}}}}"
+        }
+
+        services_payload[service_key] = {
+            "name": service.name,
+            "source": {
+                "image": service.docker_image
+            },
+            "variables": env_vars,
+            "networking": {
+                "tcpProxies": {
+                    "8000": {}
+                },
+                "serviceDomains": {
+                    "0": {}
+                }
+            }
+        }
+    mutation = """
+        mutation templateDeployV2($input: TemplateDeployV2Input!) {
+            templateDeployV2(input: $input) {
+                projectId
+                workflowId
+            }
+        }
+        """
+    
     variables = {
         "input": {
             "serializedConfig": {
-                "services": {
-                    # -------------------------
-                    # HORILLA SERVICE
-                    # -------------------------
-                    "fjlkasdfjalskdjfalksjdfkjadskf": {
-                        "name": service_name,
-                        "source": {"image": service_image},
-                        "variables": {
-                            "DATABASE_URL": {"value": f"${{{{{postgres_ref}.DATABASE_URL}}}}"},
-                            "CSRF_TRUSTED_ORIGINS": {"value": CSRF_TRUSTED_ORIGINS},
-                        },
-                        "networking": {
-                            "tcpProxies": {"8000": {}},
-                            "serviceDomains": {
-                                "0": {} 
-                            }
-                        }
-                    },
-
-                    # -------------------------
-                    # POSTGRES SERVICE
-                    # -------------------------
-                    "jfdajfkasjdflkjsadflkjasd": {
-                        "icon": "https://devicons.railway.app/i/postgresql.svg",
-                        "name": f"Postgres-{service_name}",
-                        "build": {},
-                        "source": {
-                            "image": "ghcr.io/railwayapp-templates/postgres-ssl:17"
-                        },
-                        "variables": {
-                            "PGDATA": {"value": "/var/lib/postgresql/data/pgdata"},
-                            "PGHOST": {"value": "${{RAILWAY_PRIVATE_DOMAIN}}"},
-                            "PGPORT": {"value": "5432"},
-                            "PGUSER": {"value": "${{ POSTGRES_USER }}"},
-                            "PGDATABASE": {"value": "${{POSTGRES_DB}}"},
-                            "PGPASSWORD": {"value": "${{POSTGRES_PASSWORD}}"},
-                            "POSTGRES_DB": {"value": "railway"},
-                            "DATABASE_URL": {
-                                "value": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:5432/${{PGDATABASE}}"
-                            },
-                            "POSTGRES_USER": {"value": "postgres"},
-                            "SSL_CERT_DAYS": {"value": "820"},
-                            "POSTGRES_PASSWORD": {
-                                "value": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}"
-                            },
-                            "DATABASE_PUBLIC_URL": {
-                                "value": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_TCP_PROXY_DOMAIN}}:${{RAILWAY_TCP_PROXY_PORT}}/${{PGDATABASE}}"
-                            },
-                            "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {"value": "60"}
-                        },
-                        "networking": {
-                            "tcpProxies": {"5432": {}},
-                            "serviceDomains": {}
-                        },
-                        "volumeMounts": {
-                            "fdsakfjlasdlkfjalksdfj": {"mountPath": "/var/lib/postgresql/data"}
-                        }
-                    }
-                }
+                "services": services_payload
             },
             "workspaceId": WORKSPACE_ID,
             "templateId": RAILWAY_TEMPLATE_ID,
-            "environmentId":environment_id,
+            "environmentId": environment_id,
             "projectId": project_id
         }
     }
@@ -175,11 +161,104 @@ def deploy_to_railway(service_name,service_image,project_id,environment_id):
     }
 
     deploy = send_request_to_railway(data)
-    workflow_id = deploy['data']['templateDeployV2']['workflowId']
+    print(deploy,'--------deploy-----------------')
+
+    # CSRF_TRUSTED_ORIGINS = f"https://{service_name}-opensaas-production.up.railway.app"
+
+    # postgres_ref=f"Postgres-{service_name}"
+
+    # mutation = """
+    # mutation templateDeployV2($input: TemplateDeployV2Input!) {
+    #     templateDeployV2(input: $input) {
+    #         projectId
+    #         workflowId
+    #     }
+    # }
+    # """
+
+    # variables = {
+    #     "input": {
+    #         "serializedConfig": {
+    #             "services": {
+    #                 # -------------------------
+    #                 # HORILLA SERVICE
+    #                 # -------------------------
+                    
+    #                 "fjlkasdfjalskdjfalksjdfkjadskf": {
+    #                     "name": service_name,
+    #                     "source": {"image": service_image},
+    #                     "variables": {
+    #                         "DATABASE_URL": {"value": f"${{{{{postgres_ref}.DATABASE_URL}}}}"},
+    #                         "CSRF_TRUSTED_ORIGINS": {"value": CSRF_TRUSTED_ORIGINS},
+    #                     },
+    #                     "networking": {
+    #                         "tcpProxies": {"8000": {}},
+    #                         "serviceDomains": {
+    #                             "0": {} 
+    #                         }
+    #                     }
+    #                 },
+
+    #                 # -------------------------
+    #                 # POSTGRES SERVICE
+    #                 # -------------------------
+    #                 "jfdajfkasjdflkjsadflkjasd": {
+    #                     "icon": "https://devicons.railway.app/i/postgresql.svg",
+    #                     "name": f"Postgres-{service_name}",
+    #                     "build": {},
+    #                     "source": {
+    #                         "image": "ghcr.io/railwayapp-templates/postgres-ssl:17"
+    #                     },
+    #                     "variables": {
+    #                         "PGDATA": {"value": "/var/lib/postgresql/data/pgdata"},
+    #                         "PGHOST": {"value": "${{RAILWAY_PRIVATE_DOMAIN}}"},
+    #                         "PGPORT": {"value": "5432"},
+    #                         "PGUSER": {"value": "${{ POSTGRES_USER }}"},
+    #                         "PGDATABASE": {"value": "${{POSTGRES_DB}}"},
+    #                         "PGPASSWORD": {"value": "${{POSTGRES_PASSWORD}}"},
+    #                         "POSTGRES_DB": {"value": "railway"},
+    #                         "DATABASE_URL": {
+    #                             "value": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:5432/${{PGDATABASE}}"
+    #                         },
+    #                         "POSTGRES_USER": {"value": "postgres"},
+    #                         "SSL_CERT_DAYS": {"value": "820"},
+    #                         "POSTGRES_PASSWORD": {
+    #                             "value": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}"
+    #                         },
+    #                         "DATABASE_PUBLIC_URL": {
+    #                             "value": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_TCP_PROXY_DOMAIN}}:${{RAILWAY_TCP_PROXY_PORT}}/${{PGDATABASE}}"
+    #                         },
+    #                         "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {"value": "60"}
+    #                     },
+    #                     "networking": {
+    #                         "tcpProxies": {"5432": {}},
+    #                         "serviceDomains": {}
+    #                     },
+    #                     "volumeMounts": {
+    #                         "fdsakfjlasdlkfjalksdfj": {"mountPath": "/var/lib/postgresql/data"}
+    #                     }
+    #                 }
+    #             }
+    #         },
+    #         "workspaceId": WORKSPACE_ID,
+    #         "templateId": RAILWAY_TEMPLATE_ID,
+    #         "environmentId":environment_id,
+    #         "projectId": project_id
+    #     }
+    # }
+
+    # data = {
+    #     "query": mutation,
+    #     "variables": variables,
+    #     "operationName": "templateDeployV2"
+    # }
+
+    # deploy = send_request_to_railway(data)
+    # workflow_id = deploy['data']['templateDeployV2']['workflowId']
     
-    if deploy is None:
-        return None
-    return workflow_id
+    # if deploy is None:
+    #     return None
+    # return workflow_id
 
 
 def update_service_id(org_id):
