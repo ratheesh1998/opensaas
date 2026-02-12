@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'organization',
-    'admin_app',git 
+    'admin_app',
     'user_management',
     
 ]
