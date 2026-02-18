@@ -1,0 +1,86 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Organization {{ organization.name }}{% endblock %}
+{% block navbar_title %}Organization · {{ organization.name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_organization_list' %}" style="font-size: 14px; color: var(--admin-text-muted); text-decoration: none;">← Back to organizations</a>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 28px; margin-bottom: 24px;">
+    <h2 style="font-size: 18px; font-weight: 600; color: var(--admin-text); margin-bottom: 20px;">Organization details</h2>
+    <dl style="display: grid; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 160px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Name</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ organization.name }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 160px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Deployment template</dt>
+            <dd style="font-size: 14px;">
+                {% if organization.deployment_template_id %}
+                <a href="{% url 'admin_template_detail' organization.deployment_template_id.pk %}" style="color: var(--admin-accent); text-decoration: none;">{{ organization.deployment_template_id.name }}</a>
+                <span style="color: var(--admin-text-muted); font-size: 13px;"> · View in admin</span>
+                {% else %}—{% endif %}
+            </dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 160px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Created by</dt>
+            <dd style="font-size: 14px;">
+                {% if organization.created_by %}
+                <a href="{% url 'admin_user_detail' organization.created_by_id %}" style="color: var(--admin-accent); text-decoration: none;">{{ organization.created_by.username }}</a>
+                {% else %}—{% endif %}
+            </dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 160px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Default domain</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ organization.default_domain|default:"—" }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 160px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Project ID</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{% if organization.project_id %}{{ organization.project_id.project_id }}{% else %}—{% endif %}</dd>
+        </div>
+    </dl>
+    <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--admin-border);">
+        <a href="{% url 'detailed_organization' id=organization.pk %}" style="font-size: 14px; color: var(--admin-accent); text-decoration: none;">Open in app (full management) →</a>
+    </div>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden; margin-bottom: 24px;">
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Environment variables</div>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: var(--admin-sidebar); border-bottom: 1px solid var(--admin-border);">
+                <th style="text-align: left; padding: 10px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted);">Key</th>
+                <th style="text-align: left; padding: 10px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted);">Value</th>
+                <th style="text-align: left; padding: 10px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted);">Service</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for env in env_ids %}
+            <tr style="border-bottom: 1px solid var(--admin-border);">
+                <td style="padding: 12px 20px; font-size: 13px; color: var(--admin-text);">{{ env.key }}</td>
+                <td style="padding: 12px 20px; font-size: 13px; color: var(--admin-text-secondary);">{{ env.value }}</td>
+                <td style="padding: 12px 20px; font-size: 13px; color: var(--admin-text-muted);">{{ env.service|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="padding: 20px; color: var(--admin-text-muted); font-size: 14px;">No environment variables.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Services</div>
+    <ul style="list-style: none;">
+        {% for svc in services %}
+        <li style="border-bottom: 1px solid var(--admin-border); padding: 12px 20px; font-size: 14px; color: var(--admin-text-secondary);">Service ID: {{ svc.service_id|default:"—" }}</li>
+        {% empty %}
+        <li style="padding: 20px; color: var(--admin-text-muted); font-size: 14px;">No services.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

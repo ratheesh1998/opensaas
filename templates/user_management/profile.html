@@ -1,0 +1,212 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile – OpenSaaS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #8b5cf6;
+            --background: #0f1419;
+            --surface: #1a1f2e;
+            --surface-elevated: #242938;
+            --border: #2d3548;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+        }
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar-brand a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+        }
+        .brand-text .title { font-weight: 600; font-size: 16px; }
+        .brand-text .subtitle { font-size: 12px; color: var(--text-muted); display: block; }
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .nav-link:hover { color: var(--text-primary); background: var(--surface-elevated); }
+        .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-family: inherit;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            border: 1px solid var(--border);
+            background: var(--surface-elevated);
+            color: var(--text-primary);
+        }
+        .btn:hover { background: var(--border); }
+
+        .main-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .page-header .description { font-size: 15px; color: var(--text-muted); }
+
+        .profile-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .profile-card-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 28px;
+            color: white;
+        }
+        .profile-card-header h2 { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+        .profile-card-header .username { font-size: 14px; color: var(--text-muted); }
+        .profile-details {
+            padding: 24px;
+            display: grid;
+            gap: 20px;
+        }
+        .profile-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+        }
+        .profile-row .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            min-width: 100px;
+        }
+        .profile-row .value {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .profile-row .value.empty { color: var(--text-muted); font-style: italic; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <a href="{% url 'list_organization' %}">
+                    <div class="logo">S</div>
+                    <div class="brand-text">
+                        <span class="title">SaaS Manager</span>
+                        <span class="subtitle">Instance Dashboard</span>
+                    </div>
+                </a>
+            </div>
+            <div class="navbar-actions">
+                <a href="{% url 'list_organization' %}" class="nav-link">Organizations</a>
+                <a href="{% url 'profile' %}" class="nav-link">Profile</a>
+                <a href="{% url 'superuser_logout' %}" class="btn">Log out</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1>Profile</h1>
+            <p class="description">Your account details</p>
+        </div>
+
+        <div class="profile-card">
+            <div class="profile-card-header">
+                <div class="profile-avatar">{{ user.get_username|first|upper }}</div>
+                <div>
+                    <h2>{% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.get_username }}{% endif %}</h2>
+                    <span class="username">@{{ user.get_username }}</span>
+                </div>
+            </div>
+            <div class="profile-details">
+                <div class="profile-row">
+                    <span class="label">Username</span>
+                    <span class="value">{{ user.get_username }}</span>
+                </div>
+                <div class="profile-row">
+                    <span class="label">Email</span>
+                    <span class="value {% if not user.email %}empty{% endif %}">{% if user.email %}{{ user.email }}{% else %}Not set{% endif %}</span>
+                </div>
+                {% if user.first_name or user.last_name %}
+                <div class="profile-row">
+                    <span class="label">Name</span>
+                    <span class="value">{{ user.first_name }} {{ user.last_name }}</span>
+                </div>
+                {% endif %}
+                <div class="profile-row">
+                    <span class="label">Member since</span>
+                    <span class="value">{{ user.date_joined|date:"F j, Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from organization.views import HomePageView
+from admin_app.views import PublicWebsiteBySlugView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', HomePageView.as_view(), name='home'),
+    path('site/<slug:slug>/', PublicWebsiteBySlugView.as_view(), name='public_website_by_slug'),
     path('app/', include('organization.urls')),
     path('admin_app/', include('admin_app.urls')),
     path('user/', include('user_management.urls')),

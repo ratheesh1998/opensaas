@@ -1,0 +1,79 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+{% block navbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header" style="margin-bottom: 28px;">
+    <h1 style="font-size: 24px; font-weight: 700; color: var(--admin-text);">SaaS Admin Overview</h1>
+    <p style="font-size: 14px; color: var(--admin-text-secondary); margin-top: 4px;">Key metrics and recent activity. This view is for admins only, separate from the user app.</p>
+</div>
+
+<div class="admin-stats" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; margin-bottom: 32px;">
+    <a href="{% url 'admin_users' %}" style="text-decoration: none;">
+        <div class="stat-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 24px;">
+            <div style="font-size: 28px; font-weight: 700; color: var(--admin-accent);">{{ users_count }}</div>
+            <div style="font-size: 13px; color: var(--admin-text-secondary); margin-top: 4px;">Users</div>
+        </div>
+    </a>
+    <a href="{% url 'admin_organization_list' %}" style="text-decoration: none;">
+        <div class="stat-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 24px;">
+            <div style="font-size: 28px; font-weight: 700; color: var(--admin-accent);">{{ organizations_count }}</div>
+            <div style="font-size: 13px; color: var(--admin-text-secondary); margin-top: 4px;">Organizations</div>
+        </div>
+    </a>
+    <a href="{% url 'admin_template_list' %}" style="text-decoration: none;">
+        <div class="stat-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 24px;">
+            <div style="font-size: 28px; font-weight: 700; color: var(--admin-accent);">{{ templates_count }}</div>
+            <div style="font-size: 13px; color: var(--admin-text-secondary); margin-top: 4px;">Templates</div>
+        </div>
+    </a>
+    <div class="stat-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 24px;">
+        <div style="font-size: 28px; font-weight: 700; color: var(--admin-text);">{{ templates_published_count }}</div>
+        <div style="font-size: 13px; color: var(--admin-text-secondary); margin-top: 4px;">Published</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+    <div class="admin-panel" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Recent Users</div>
+        <ul style="list-style: none;">
+            {% for u in recent_users %}
+            <li style="border-bottom: 1px solid var(--admin-border);">
+                <a href="{% url 'admin_user_detail' u.pk %}" style="display: block; padding: 12px 20px; color: var(--admin-text-secondary); text-decoration: none; font-size: 14px;">{{ u.username }}{% if u.email %} · {{ u.email }}{% endif %}</a>
+            </li>
+            {% empty %}
+            <li style="padding: 16px 20px; color: var(--admin-text-muted); font-size: 14px;">No users yet.</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'admin_users' %}" style="display: block; padding: 12px 20px; font-size: 13px; color: var(--admin-accent); text-decoration: none;">View all users →</a>
+    </div>
+    <div class="admin-panel" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Recent Organizations</div>
+        <ul style="list-style: none;">
+            {% for org in recent_organizations %}
+            <li style="border-bottom: 1px solid var(--admin-border);">
+                <a href="{% url 'admin_organization_detail' org.pk %}" style="display: block; padding: 12px 20px; color: var(--admin-text-secondary); text-decoration: none; font-size: 14px;">{{ org.name }}{% if org.created_by %} · {{ org.created_by.username }}{% endif %}</a>
+            </li>
+            {% empty %}
+            <li style="padding: 16px 20px; color: var(--admin-text-muted); font-size: 14px;">No organizations yet.</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'admin_organization_list' %}" style="display: block; padding: 12px 20px; font-size: 13px; color: var(--admin-accent); text-decoration: none;">View all organizations →</a>
+    </div>
+    <div class="admin-panel" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+        <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Recent Templates</div>
+        <ul style="list-style: none;">
+            {% for t in recent_templates %}
+            <li style="border-bottom: 1px solid var(--admin-border);">
+                <a href="{% url 'admin_template_detail' t.pk %}" style="display: block; padding: 12px 20px; color: var(--admin-text-secondary); text-decoration: none; font-size: 14px;">{{ t.name }}{% if t.published %} · Published{% endif %}</a>
+            </li>
+            {% empty %}
+            <li style="padding: 16px 20px; color: var(--admin-text-muted); font-size: 14px;">No templates yet.</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'admin_template_list' %}" style="display: block; padding: 12px 20px; font-size: 13px; color: var(--admin-accent); text-decoration: none;">View all templates →</a>
+    </div>
+</div>
+{% endblock %}

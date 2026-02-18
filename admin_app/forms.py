@@ -1,6 +1,6 @@
 
 
-from admin_app.models import Creadentials, DeploymentTemplate, Environment, TemplateService
+from admin_app.models import Creadentials, DeploymentTemplate, Environment, TemplateService, Website, WebsiteSection
 from django import forms
 
 
@@ -23,3 +23,15 @@ class EnvironmentForm(forms.ModelForm):
     class Meta:
         model = Environment
         fields = ['name', 'value']
+
+
+class WebsiteForm(forms.ModelForm):
+    class Meta:
+        model = Website
+        fields = ['name', 'slug', 'tagline', 'niche', 'is_default']
+
+
+class WebsiteSectionForm(forms.ModelForm):
+    class Meta:
+        model = WebsiteSection
+        fields = ['section_type', 'order', 'title', 'subtitle', 'content', 'image', 'image_url', 'button_text', 'button_link', 'is_active']

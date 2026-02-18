@@ -1,0 +1,57 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}User {{ user_obj.username }}{% endblock %}
+{% block navbar_title %}User · {{ user_obj.username }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_users' %}" style="font-size: 14px; color: var(--admin-text-muted); text-decoration: none;">← Back to users</a>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 28px; margin-bottom: 24px;">
+    <h2 style="font-size: 18px; font-weight: 600; color: var(--admin-text); margin-bottom: 20px;">User details</h2>
+    <dl style="display: grid; gap: 12px;">
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Username</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ user_obj.username }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Email</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ user_obj.email|default:"—" }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Full name</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{% if user_obj.get_full_name %}{{ user_obj.get_full_name }}{% else %}—{% endif %}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Staff / Superuser</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{% if user_obj.is_staff %}Staff{% if user_obj.is_superuser %} · Superuser{% endif %}{% else %}No{% endif %}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Date joined</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ user_obj.date_joined|date:"M d, Y H:i" }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Last login</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{% if user_obj.last_login %}{{ user_obj.last_login|date:"M d, Y H:i" }}{% else %}—{% endif %}</dd>
+        </div>
+    </dl>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Organizations created by this user</div>
+    <ul style="list-style: none;">
+        {% for org in organizations %}
+        <li style="border-bottom: 1px solid var(--admin-border);">
+            <a href="{% url 'admin_organization_detail' org.pk %}" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; color: var(--admin-text-secondary); text-decoration: none; font-size: 14px;">
+                <span>{{ org.name }}</span>
+                <span style="color: var(--admin-accent);">View in admin →</span>
+            </a>
+        </li>
+        {% empty %}
+        <li style="padding: 20px; color: var(--admin-text-muted); font-size: 14px;">No organizations created by this user.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

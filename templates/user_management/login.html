@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Superuser Login – OpenSaaS</title>
+    <title>Sign in – OpenSaaS</title>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * {
@@ -198,9 +198,8 @@
         <div class="login-card">
             <div class="login-header">
                 <div class="logo">O</div>
-                <h1>Superuser Login</h1>
-                <p>Sign in with an administrator account</p>
-                <span class="badge">Superuser only</span>
+                <h1>Sign in</h1>
+                <p>Sign in to your account</p>
             </div>
 
             {% if messages %}
@@ -229,7 +228,7 @@
                 <button type="submit" class="btn-login">Sign in</button>
             </form>
 
-            <p class="footer-note">Only accounts with superuser privileges can access this login.</p>
+            <p class="footer-note">Don't have an account? <a href="{% url 'register' %}" style="color: var(--primary-light); text-decoration: none; font-weight: 500;">Create one</a></p>
         </div>
     </div>
 </body>

@@ -1,0 +1,104 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Template {{ template.name }}{% endblock %}
+{% block navbar_title %}Template · {{ template.name }}{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_template_list' %}" style="font-size: 14px; color: var(--admin-text-muted); text-decoration: none;">← Back to templates</a>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; padding: 28px; margin-bottom: 24px;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h2 style="font-size: 18px; font-weight: 600; color: var(--admin-text); margin-bottom: 4px;">Template details</h2>
+            <p style="font-size: 13px; color: var(--admin-text-muted);">Name, description, published</p>
+        </div>
+        <a href="{% url 'admin_template_edit' template.pk %}" style="padding: 10px 18px; font-size: 14px; font-weight: 500; color: #0c1220; background: var(--admin-accent); border-radius: 10px; text-decoration: none;">Edit template</a>
+    </div>
+    <dl style="display: grid; gap: 12px; margin-top: 20px;">
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Name</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ template.name }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Description</dt>
+            <dd style="font-size: 14px; color: var(--admin-text-secondary);">{{ template.description|default:"—" }}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Published</dt>
+            <dd style="font-size: 14px;">{% if template.published %}<span style="color: var(--admin-accent);">Yes</span>{% else %}No{% endif %}</dd>
+        </div>
+        <div style="display: grid; grid-template-columns: 140px 1fr;">
+            <dt style="font-size: 13px; color: var(--admin-text-muted);">Created</dt>
+            <dd style="font-size: 14px; color: var(--admin-text);">{{ template.created_at|date:"M d, Y H:i" }}</dd>
+        </div>
+    </dl>
+</div>
+
+<div class="admin-card" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden; margin-bottom: 24px;">
+    <div style="padding: 16px 20px; border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">Services</div>
+    <div style="padding: 20px;">
+        <form method="post" action="{% url 'admin_service_add' template.pk %}" style="
+            background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 12px; padding: 20px; margin-bottom: 24px;
+        ">
+            <h3 style="font-size: 14px; font-weight: 600; color: var(--admin-text); margin-bottom: 12px;">Add service</h3>
+            {% csrf_token %}
+            <div style="display: grid; gap: 12px; max-width: 400px;">
+                <div>
+                    <label for="id_name" style="display: block; font-size: 12px; font-weight: 500; color: var(--admin-text-muted); margin-bottom: 4px;">Name</label>
+                    <input type="text" name="name" id="id_name" required style="width: 100%; padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--admin-text); background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 8px;">
+                </div>
+                <div>
+                    <label for="id_docker_image" style="display: block; font-size: 12px; font-weight: 500; color: var(--admin-text-muted); margin-bottom: 4px;">Docker image</label>
+                    <input type="text" name="docker_image" id="id_docker_image" required style="width: 100%; padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--admin-text); background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 8px;">
+                </div>
+                <button type="submit" style="padding: 10px 18px; font-size: 14px; font-weight: 500; font-family: inherit; color: #0c1220; background: var(--admin-accent); border: none; border-radius: 8px; cursor: pointer;">Add service</button>
+            </div>
+        </form>
+
+        {% for svc in services %}
+        <div style="border: 1px solid var(--admin-border); border-radius: 12px; margin-bottom: 16px; overflow: hidden;">
+            <div style="padding: 14px 20px; background: var(--admin-sidebar); border-bottom: 1px solid var(--admin-border); font-weight: 600; color: var(--admin-text);">{{ svc.name }}</div>
+            <div style="padding: 12px 20px; font-size: 13px; color: var(--admin-text-muted);">🐳 {{ svc.docker_image }}</div>
+            <div style="padding: 16px 20px;">
+                <div style="font-size: 12px; font-weight: 600; color: var(--admin-text-muted); margin-bottom: 10px;">Environment variables</div>
+                <form method="post" action="{% url 'admin_environment_add' svc.pk %}" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px;">
+                    {% csrf_token %}
+                    <div>
+                        <label for="env_name_{{ svc.id }}" style="display: block; font-size: 11px; color: var(--admin-text-muted); margin-bottom: 4px;">Name</label>
+                        <input type="text" name="name" id="env_name_{{ svc.id }}" placeholder="VAR_NAME" required style="width: 140px; padding: 8px 12px; font-size: 13px; font-family: inherit; color: var(--admin-text); background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 8px;">
+                    </div>
+                    <div>
+                        <label for="env_value_{{ svc.id }}" style="display: block; font-size: 11px; color: var(--admin-text-muted); margin-bottom: 4px;">Value</label>
+                        <input type="text" name="value" id="env_value_{{ svc.id }}" placeholder="value" required style="width: 160px; padding: 8px 12px; font-size: 13px; font-family: inherit; color: var(--admin-text); background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 8px;">
+                    </div>
+                    <button type="submit" style="padding: 8px 14px; font-size: 13px; font-weight: 500; font-family: inherit; color: #0c1220; background: var(--admin-accent); border: none; border-radius: 8px; cursor: pointer;">Add</button>
+                </form>
+                <ul style="list-style: none;">
+                    {% for env in svc.environment_set.all %}
+                    <li style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: var(--admin-bg); border: 1px solid var(--admin-border); border-radius: 8px; margin-bottom: 8px;">
+                        <form method="post" action="{% url 'admin_environment_update' env.pk %}" style="display: flex; gap: 8px; align-items: center; flex: 1; min-width: 0;">
+                            {% csrf_token %}
+                            <input type="text" name="name" value="{{ env.name }}" required style="width: 120px; padding: 6px 10px; font-size: 13px; font-family: inherit; color: var(--admin-text); background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 6px;">
+                            <input type="text" name="value" value="{{ env.value }}" required style="flex: 1; min-width: 80px; padding: 6px 10px; font-size: 13px; font-family: inherit; color: var(--admin-text); background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 6px;">
+                            <button type="submit" style="padding: 6px 12px; font-size: 12px; font-weight: 500; font-family: inherit; color: #0c1220; background: var(--admin-accent); border: none; border-radius: 6px; cursor: pointer;">Update</button>
+                        </form>
+                        <form method="post" action="{% url 'admin_environment_delete' env.pk %}" style="flex-shrink: 0;" onsubmit="return confirm('Delete this variable?');">
+                            {% csrf_token %}
+                            <button type="submit" style="padding: 6px 12px; font-size: 12px; font-weight: 500; font-family: inherit; color: var(--admin-danger); background: transparent; border: 1px solid var(--admin-danger); border-radius: 6px; cursor: pointer;">Delete</button>
+                        </form>
+                    </li>
+                    {% empty %}
+                    <li style="font-size: 13px; color: var(--admin-text-muted); padding: 8px 0;">No environment variables. Add one above.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: var(--admin-text-muted); font-size: 14px;">No services yet. Add one above.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

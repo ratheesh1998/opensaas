@@ -101,6 +101,15 @@
             gap: 12px;
             align-items: center;
         }
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .nav-link:hover { color: var(--primary); }
 
         /* Main Container */
         .main-container {
@@ -694,8 +703,10 @@
                 </div>
             </div>
             <div class="navbar-actions">
-                <button class="btn btn-secondary btn-icon" title="Notifications">🔔</button>
-                <button class="btn btn-secondary btn-icon" title="Settings">⚙️</button>
+                {% if user.is_superuser %}
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-primary" title="Admin dashboard">Admin</a>
+                {% endif %}
+                <a href="{% url 'profile' %}" class="nav-link">Profile</a>
                 <a href="{% url 'superuser_logout' %}" class="btn btn-secondary" title="Log out">Log out</a>
             </div>
         </div>
@@ -713,14 +724,7 @@
                         <span class="label">Status</span>
                         <span class="value">{{ deployment_status }}</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="label">Docker Image</span>
-                        <span class="value">{{ organization.docker_image|truncatechars:20 }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="label">Database</span>
-                        <span class="value">{{ organization.database_name }}</span>
-                    </div>
+                   
                 </div>
             </div>
         </div>
@@ -733,9 +737,6 @@
             <button class="tab-btn" onclick="switchTab(event, 'deployment')">
                 🚀 Deployment
             </button>
-            <button class="tab-btn" onclick="switchTab(event, 'environment')">
-                🔧 Environment
-            </button>
             <button class="tab-btn" onclick="switchTab(event, 'settings')">
                 ⚙️ Settings
             </button>
@@ -747,48 +748,23 @@
                 <div class="card-header">
                     <h2 class="card-title">
                         <span class="icon">📋</span>
-                        Organization Information
+                        Organization
                     </h2>
                 </div>
-                <div class="info-grid">
+                <div class="info-grid overview-simple">
                     <div class="info-item">
-                        <div class="label">Organization Name</div>
+                        <div class="label">Name</div>
                         <div class="value">{{ organization.name }}</div>
                     </div>
                     <div class="info-item">
-                        <div class="label">Docker Image</div>
-                        <div class="value">{{ organization.docker_image }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Database Name</div>
-                        <div class="value">{{ organization.database_name }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Project ID</div>
-                        <div class="value">{{ project_id.project_id }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Environment ID</div>
-                        <div class="value">{{ project_id.environment_id }}</div>
-                    </div>
-                    <div class="info-item">
-                        <div class="label">Service ID</div>
-                        <div class="value">{{ organization.service_set.first.service_id }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <span class="icon">🌐</span>
-                        Access Information
-                    </h2>
-                </div>
-                <div class="info-item">
-                    <div class="label">Default Domain</div>
-                    <div class="value">
-                        <a href="{{ organization.default_domain }}" target="_blank">{{ organization.default_domain }} →</a>
+                        <div class="label">Domain</div>
+                        <div class="value">
+                            {% if organization.default_domain %}
+                            <a href="{{ organization.default_domain }}" target="_blank" rel="noopener">{{ organization.default_domain }} →</a>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -828,51 +804,6 @@
                     </div>
                 </div>
                 {% endif %}
-            </div>
-        </div>
-
-        <!-- Tab Content: Environment -->
-        <div id="environment" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title">
-                        <span class="icon">🔧</span>
-                        Environment Variables
-                    </h2>
-                </div>
-
-                {% if env_ids %}
-                <div class="env-list">
-                    {% for env in env_ids %}
-                    <div class="env-item">
-                        <form action="{% url 'update_env' env.id %}" method="post" class="env-form">
-                            {% csrf_token %}
-                            <input type="text" name="key" value="{{ env.key }}" class="form-input" placeholder="KEY" required>
-                            <input type="text" name="value" value="{{ env.value }}" class="form-input" placeholder="Value" required>
-                            <select name="service" class="form-select">
-                                <option value="service" {% if env.service == 'service' %}selected{% endif %}>Service</option>
-                                <option value="database" {% if env.service == 'database' %}selected{% endif %}>Database</option>
-                            </select>
-                            <button type="submit" class="btn btn-primary">💾 Update</button>
-                        </form>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <div class="empty-state">
-                    <div class="icon">📭</div>
-                    <p>No environment variables configured yet</p>
-                </div>
-                {% endif %}
-
-                <div class="add-env-card">
-                    <h3>➕ Add New Environment Variable</h3>
-                    <form action="{% url 'add_env' organization.id %}" method="post">
-                        {% csrf_token %}
-                        {{ env_form.as_p }}
-                        <button type="submit" class="btn btn-primary">Add Variable</button>
-                    </form>
-                </div>
             </div>
         </div>
 

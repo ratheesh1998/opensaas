@@ -123,6 +123,16 @@
             transform: translateX(-2px);
         }
 
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .nav-link:hover { color: var(--primary); }
+
         /* Main Container */
         .main-container {
             max-width: 900px;
@@ -744,6 +754,7 @@
             </div>
             <div class="navbar-actions">
                 <a href="{% url 'list_organization' %}" class="back-link">← Back to List</a>
+                <a href="{% url 'profile' %}" class="nav-link">Profile</a>
                 <a href="{% url 'superuser_logout' %}" class="btn btn-secondary" title="Log out">Log out</a>
             </div>
         </div>

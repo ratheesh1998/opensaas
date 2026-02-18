@@ -1,0 +1,70 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Organizations{% endblock %}
+{% block navbar_title %}Organizations{% endblock %}
+
+{% block content %}
+<div class="admin-page-header" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px;">
+    <h1 style="font-size: 22px; font-weight: 600; color: var(--admin-text);">All Organizations</h1>
+    <form method="get" action="{% url 'admin_organization_list' %}" style="display: flex; gap: 8px;">
+        <input type="text" name="search" value="{{ search }}" placeholder="Search organizations…" style="
+            padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--admin-text); background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 10px; width: 220px; outline: none;
+        ">
+        <button type="submit" style="padding: 10px 18px; font-size: 14px; font-weight: 500; font-family: inherit; color: #0c1220; background: var(--admin-accent); border: none; border-radius: 10px; cursor: pointer;">Search</button>
+    </form>
+</div>
+
+<div class="admin-table-wrap" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: var(--admin-sidebar); border-bottom: 1px solid var(--admin-border);">
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Name</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Template</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Created by</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Domain</th>
+                <th style="text-align: right; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for org in page_obj %}
+            <tr style="border-bottom: 1px solid var(--admin-border);">
+                <td style="padding: 14px 20px; font-size: 14px; color: var(--admin-text);">{{ org.name }}</td>
+                <td style="padding: 14px 20px; font-size: 14px;">
+                    {% if org.deployment_template_id %}
+                    <a href="{% url 'admin_template_detail' org.deployment_template_id.pk %}" style="color: var(--admin-accent); text-decoration: none;">{{ org.deployment_template_id.name }}</a>
+                    {% else %}
+                    <span style="color: var(--admin-text-muted);">—</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 14px 20px; font-size: 14px; color: var(--admin-text-secondary);">
+                    {% if org.created_by %}
+                    <a href="{% url 'admin_user_detail' org.created_by_id %}" style="color: var(--admin-text-secondary); text-decoration: none;">{{ org.created_by.username }}</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td style="padding: 14px 20px; font-size: 13px; color: var(--admin-text-muted);">{{ org.default_domain|default:"—" }}</td>
+                <td style="padding: 14px 20px; text-align: right;">
+                    <a href="{% url 'admin_organization_detail' org.pk %}" style="font-size: 13px; color: var(--admin-accent); text-decoration: none;">View →</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding: 32px 20px; text-align: center; color: var(--admin-text-muted);">No organizations found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="admin-pagination" style="margin-top: 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 8px 14px; font-size: 13px; color: var(--admin-text-secondary); text-decoration: none; border: 1px solid var(--admin-border); border-radius: 8px;">← Previous</a>
+    {% endif %}
+    <span style="font-size: 13px; color: var(--admin-text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 8px 14px; font-size: 13px; color: var(--admin-accent); text-decoration: none; border: 1px solid var(--admin-border); border-radius: 8px;">Next →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

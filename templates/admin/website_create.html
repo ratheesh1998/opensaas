@@ -1,0 +1,160 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Create Website{% endblock %}
+{% block navbar_title %}Create Website{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_website_list' %}" style="font-size:14px;color:var(--admin-text-muted);text-decoration:none;">← Back to websites</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;max-width:1000px;">
+
+    <!-- ── Form ── -->
+    <div class="admin-card" style="background:var(--admin-surface);border:1px solid var(--admin-border);border-radius:14px;padding:28px;">
+        <h1 style="font-size:20px;font-weight:600;color:var(--admin-text);margin-bottom:8px;">New website</h1>
+        <p style="font-size:14px;color:var(--admin-text-secondary);margin-bottom:24px;">
+            Choose a niche and we'll auto-fill all sections with relevant copy, theme, and structure.
+        </p>
+
+        <form method="post" action="{% url 'admin_website_create' %}">
+            {% csrf_token %}
+            <div style="display:flex;flex-direction:column;gap:18px;">
+
+                <!-- Name -->
+                <div>
+                    <label for="id_name" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Name</label>
+                    <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}"
+                           maxlength="255" required
+                           style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;outline:none;">
+                    {% if form.name.errors %}<ul style="list-style:none;font-size:13px;color:var(--admin-danger);margin-top:6px;">{% for e in form.name.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <!-- Slug -->
+                <div>
+                    <label for="id_slug" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Slug</label>
+                    <input type="text" name="slug" id="id_slug" value="{{ form.slug.value|default:'' }}"
+                           maxlength="80" required placeholder="e.g. my-product"
+                           style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;outline:none;">
+                    {% if form.slug.errors %}<ul style="list-style:none;font-size:13px;color:var(--admin-danger);margin-top:6px;">{% for e in form.slug.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                </div>
+
+                <!-- Tagline -->
+                <div>
+                    <label for="id_tagline" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Tagline</label>
+                    <input type="text" name="tagline" id="id_tagline" value="{{ form.tagline.value|default:'' }}" maxlength="255"
+                           style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;outline:none;">
+                </div>
+
+                <!-- Niche -->
+                <div>
+                    <label for="id_niche" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Niche / Industry</label>
+                    <select name="niche" id="id_niche"
+                            style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;outline:none;">
+                        {% for value, label in form.fields.niche.choices %}
+                        <option value="{{ value }}" {% if form.niche.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <p style="font-size:12px;color:var(--admin-text-muted);margin-top:6px;">Selecting a niche auto-fills sections, theme colours, and copy.</p>
+                </div>
+
+                <!-- Default -->
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <input type="checkbox" name="is_default" id="id_is_default"
+                           {% if form.is_default.value %}checked{% endif %}
+                           style="width:18px;height:18px;accent-color:var(--admin-accent);">
+                    <label for="id_is_default" style="font-size:14px;color:var(--admin-text-secondary);">Set as default (main website)</label>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;display:flex;gap:12px;">
+                <button type="submit"
+                        style="padding:12px 24px;font-size:14px;font-weight:600;font-family:inherit;color:#0c1220;background:linear-gradient(135deg,var(--admin-accent),#d97706);border:none;border-radius:10px;cursor:pointer;">
+                    Create website
+                </button>
+                <a href="{% url 'admin_website_list' %}"
+                   style="padding:12px 24px;font-size:14px;font-weight:500;font-family:inherit;color:var(--admin-text-secondary);text-decoration:none;border:1px solid var(--admin-border);border-radius:10px;">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── Live Niche Preview Card ── -->
+    <div id="niche-preview"
+         style="border-radius:14px;padding:28px;border:1px solid var(--admin-border);background:var(--admin-surface);transition:all .3s;">
+        <p style="font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--admin-text-muted);text-transform:uppercase;margin-bottom:16px;">Niche Preview</p>
+
+        <div id="preview-emoji" style="font-size:48px;margin-bottom:12px;">✨</div>
+        <h2 id="preview-label" style="font-size:18px;font-weight:700;color:var(--admin-text);margin-bottom:8px;">Custom / Other</h2>
+        <p id="preview-hero-title" style="font-size:14px;color:var(--admin-text-secondary);margin-bottom:16px;line-height:1.5;">
+            Build something amazing with fully custom sections.
+        </p>
+
+        <div style="margin-bottom:16px;">
+            <p style="font-size:12px;font-weight:600;color:var(--admin-text-muted);margin-bottom:8px;">AUTO-GENERATED SECTIONS</p>
+            <div id="preview-sections" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+
+        <div>
+            <p style="font-size:12px;font-weight:600;color:var(--admin-text-muted);margin-bottom:8px;">THEME COLOURS</p>
+            <div id="preview-colours" style="display:flex;gap:8px;align-items:center;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+const PRESETS = {{ niche_presets_json|safe }};
+
+const nicheSelect = document.getElementById('id_niche');
+
+function updatePreview(niche) {
+    const p = PRESETS[niche];
+    if (!p) return;
+
+    document.getElementById('preview-emoji').textContent  = p.emoji || '✨';
+    document.getElementById('preview-label').textContent  = p.label || niche;
+    document.getElementById('preview-hero-title').textContent =
+        (p.sections && p.sections[0] && p.sections[0].title) || 'Customise your sections manually.';
+
+    // Sections chips
+    const sectionsEl = document.getElementById('preview-sections');
+    sectionsEl.innerHTML = '';
+    (p.sections || []).forEach(s => {
+        const chip = document.createElement('span');
+        chip.textContent = s.section_type.charAt(0).toUpperCase() + s.section_type.slice(1);
+        chip.style.cssText = 'padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:rgba(255,255,255,.07);color:#aaa;border:1px solid rgba(255,255,255,.1);';
+        sectionsEl.appendChild(chip);
+    });
+
+    // Colours
+    const coloursEl = document.getElementById('preview-colours');
+    coloursEl.innerHTML = '';
+    const theme = p.theme || {};
+    ['bg','surface','primary','primary_light','accent'].forEach(key => {
+        if (!theme[key]) return;
+        const dot = document.createElement('div');
+        dot.title = key;
+        dot.style.cssText = `width:22px;height:22px;border-radius:50%;background:${theme[key]};border:2px solid rgba(255,255,255,.12);`;
+        coloursEl.appendChild(dot);
+    });
+}
+
+nicheSelect.addEventListener('change', e => updatePreview(e.target.value));
+updatePreview(nicheSelect.value);
+
+// Auto-slug from name
+document.getElementById('id_name').addEventListener('input', function () {
+    const slug = document.getElementById('id_slug');
+    if (!slug._touched) {
+        slug.value = this.value.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim().replace(/\s+/g, '-');
+    }
+});
+document.getElementById('id_slug').addEventListener('input', function () {
+    this._touched = true;
+});
+</script>
+{% endblock %}

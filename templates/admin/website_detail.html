@@ -1,0 +1,117 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Manage: {{ website.name }}{% endblock %}
+{% block navbar_title %}Manage website{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_website_list' %}" style="font-size:14px;color:var(--admin-text-muted);text-decoration:none;">← Back to websites</a>
+</div>
+
+{% if messages %}
+<ul style="list-style:none;padding:0;margin-bottom:20px;">
+    {% for message in messages %}
+    <li style="padding:12px 16px;border-radius:10px;font-size:14px;margin-bottom:8px;
+        {% if message.tags == 'error' %}background:rgba(239,68,68,0.15);color:#fca5a5;border:1px solid var(--admin-danger);{% else %}background:rgba(34,197,94,0.15);color:#86efac;border:1px solid var(--admin-success);{% endif %}">
+        {{ message }}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<!-- Edit website card -->
+<div class="admin-card" style="background:var(--admin-surface);border:1px solid var(--admin-border);border-radius:14px;padding:28px;margin-bottom:28px;max-width:800px;">
+    <h1 style="font-size:20px;font-weight:600;color:var(--admin-text);margin-bottom:20px;">Edit website</h1>
+
+    <form method="post" action="{% url 'admin_website_update' website.pk %}">
+        {% csrf_token %}
+        <div style="display:flex;flex-direction:column;gap:18px;">
+            <div>
+                <label for="id_name" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Name</label>
+                <input type="text" name="name" id="id_name" value="{{ website_form.instance.name }}" maxlength="255" required
+                    style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;">
+            </div>
+            <div>
+                <label for="id_slug" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Slug</label>
+                <input type="text" name="slug" id="id_slug" value="{{ website_form.instance.slug }}" maxlength="80" required placeholder="e.g. my-product"
+                    style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;">
+            </div>
+            <div>
+                <label for="id_tagline" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Tagline</label>
+                <input type="text" name="tagline" id="id_tagline" value="{{ website_form.instance.tagline|default:'' }}" maxlength="255"
+                    style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;">
+            </div>
+            <div>
+                <label for="id_niche" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">Niche / Industry</label>
+                <select name="niche" id="id_niche"
+                    style="width:100%;padding:12px 16px;font-size:14px;font-family:inherit;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:10px;">
+                    {% for value, label in website_form.fields.niche.choices %}
+                    <option value="{{ value }}" {% if website.niche == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <input type="checkbox" name="is_default" id="id_is_default" {% if website.is_default %}checked{% endif %}
+                    style="width:18px;height:18px;accent-color:var(--admin-accent);">
+                <label for="id_is_default" style="font-size:14px;color:var(--admin-text-secondary);">Set as default (main website)</label>
+            </div>
+        </div>
+        <div style="margin-top:24px;">
+            <button type="submit" style="padding:12px 24px;font-size:14px;font-weight:600;font-family:inherit;color:#0c1220;background:linear-gradient(135deg,var(--admin-accent),#d97706);border:none;border-radius:10px;cursor:pointer;">Save changes</button>
+        </div>
+    </form>
+</div>
+
+<!-- Sections -->
+<div class="admin-card" style="background:var(--admin-surface);border:1px solid var(--admin-border);border-radius:14px;padding:28px;margin-bottom:28px;">
+    <h2 style="font-size:18px;font-weight:600;color:var(--admin-text);margin-bottom:20px;">Sections</h2>
+
+    {% for section in sections %}
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid var(--admin-border);flex-wrap:wrap;">
+        <div>
+            <span style="font-size:12px;font-weight:600;color:var(--admin-text-muted);text-transform:uppercase;">{{ section.get_section_type_display }}</span>
+            <span style="font-size:14px;color:var(--admin-text-secondary);margin-left:8px;">order {{ section.order }}</span>
+            {% if section.title %}<span style="font-size:14px;color:var(--admin-text);margin-left:8px;">— {{ section.title|truncatewords:8 }}</span>{% endif %}
+        </div>
+        <div style="display:flex;gap:8px;">
+            <a href="{% url 'admin_section_edit' website.pk section.pk %}" style="padding:6px 12px;font-size:13px;color:var(--admin-accent);text-decoration:none;border:1px solid var(--admin-border);border-radius:8px;">Edit</a>
+            <form method="post" action="{% url 'admin_section_delete' website.pk section.pk %}" style="display:inline;" onsubmit="return confirm('Delete this section?');">
+                {% csrf_token %}
+                <button type="submit" style="padding:6px 12px;font-size:13px;color:var(--admin-danger);background:transparent;border:1px solid var(--admin-border);border-radius:8px;cursor:pointer;">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <p style="font-size:14px;color:var(--admin-text-muted);margin:0;">No sections yet. Add one below.</p>
+    {% endfor %}
+
+    <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--admin-border);">
+        <h3 style="font-size:15px;font-weight:600;color:var(--admin-text);margin-bottom:16px;">Add section</h3>
+        <form method="post" action="{% url 'admin_section_add' website.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;">
+                <div>
+                    <label style="display:block;font-size:12px;color:var(--admin-text-muted);margin-bottom:4px;">Type</label>
+                    <select name="section_type" style="width:100%;padding:10px 12px;font-size:14px;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:8px;">
+                        {% for v, l in section_form.section_type.field.choices %}<option value="{{ v }}">{{ l }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;color:var(--admin-text-muted);margin-bottom:4px;">Order</label>
+                    <input type="number" name="order" value="0" min="0" style="width:100%;padding:10px 12px;font-size:14px;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:8px;">
+                </div>
+                <div>
+                    <label style="display:block;font-size:12px;color:var(--admin-text-muted);margin-bottom:4px;">Title</label>
+                    <input type="text" name="title" maxlength="255" style="width:100%;padding:10px 12px;font-size:14px;color:var(--admin-text);background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:8px;">
+                </div>
+            </div>
+            <button type="submit" style="padding:10px 20px;font-size:13px;font-weight:600;color:#0c1220;background:var(--admin-accent);border:none;border-radius:8px;cursor:pointer;">Add section</button>
+        </form>
+    </div>
+</div>
+
+<p style="font-size:13px;color:var(--admin-text-muted);">
+    <a href="{% url 'public_website_by_slug' slug=website.slug %}" target="_blank" style="color:var(--admin-accent);">View live site →</a>
+</p>
+{% endblock %}

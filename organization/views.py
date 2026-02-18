@@ -29,7 +29,9 @@ class CreateOrganizationView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = OrganizationForm(request.POST)
         if form.is_valid():
-            organization = form.save()
+            organization = form.save(commit=False)
+            organization.created_by = request.user
+            organization.save()
             if not Project.objects.exists():
                 project_id = project_create(service_name=request.POST.get('name'))
                 project_id.save()
@@ -55,7 +57,7 @@ class ListOrganizationView(LoginRequiredMixin, View):
         if search:
             organizations = organizations.filter(name__icontains=search)
 
-        paginator = Paginator(organizations, 10)  # items per page
+        paginator = Paginator(organizations, 12)  # items per page
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
@@ -63,6 +65,9 @@ class ListOrganizationView(LoginRequiredMixin, View):
         # Also open credentials modal on list view when no credentials exist
         if not Creadentials.objects.exists():
             show_credentials_modal = True
+        # Redirect superuser to admin when credentials prompt was needed (modal removed)
+        if show_credentials_modal and request.user.is_superuser:
+            return redirect('admin_dashboard')
 
         context = {
             "page_obj": page_obj,

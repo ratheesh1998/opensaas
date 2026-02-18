@@ -1,0 +1,37 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Edit section – {{ website.name }}{% endblock %}
+{% block navbar_title %}Edit section{% endblock %}
+
+{% block content %}
+<style>
+.admin-card input, .admin-card select, .admin-card textarea { width:100%; padding:10px 12px; font-size:14px; font-family:inherit; color:var(--admin-text); background:var(--admin-bg); border:1px solid var(--admin-border); border-radius:8px; }
+.admin-card textarea { min-height:100px; resize:vertical; }
+</style>
+<div style="margin-bottom: 24px;">
+    <a href="{% url 'admin_website_detail' website.pk %}" style="font-size:14px;color:var(--admin-text-muted);text-decoration:none;">← Back to website</a>
+</div>
+
+<div class="admin-card" style="background:var(--admin-surface);border:1px solid var(--admin-border);border-radius:14px;padding:28px;max-width:640px;">
+    <h1 style="font-size:20px;font-weight:600;color:var(--admin-text);margin-bottom:8px;">Edit section</h1>
+    <p style="font-size:14px;color:var(--admin-text-secondary);margin-bottom:24px;">{{ section.get_section_type_display }} (order {{ section.order }})</p>
+
+    <form method="post" action="{% url 'admin_section_update' website.pk section.pk %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="display:flex;flex-direction:column;gap:16px;">
+            {% for field in section_form %}
+            <div>
+                <label for="{{ field.id_for_label }}" style="display:block;font-size:13px;font-weight:500;color:var(--admin-text-secondary);margin-bottom:6px;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<ul style="list-style:none;font-size:13px;color:var(--admin-danger);margin-top:6px;">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        <div style="margin-top:24px;display:flex;gap:12px;">
+            <button type="submit" style="padding:12px 24px;font-size:14px;font-weight:600;font-family:inherit;color:#0c1220;background:linear-gradient(135deg,var(--admin-accent),#d97706);border:none;border-radius:10px;cursor:pointer;">Save section</button>
+            <a href="{% url 'admin_website_detail' website.pk %}" style="padding:12px 24px;font-size:14px;font-weight:500;color:var(--admin-text-secondary);text-decoration:none;border:1px solid var(--admin-border);border-radius:10px;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

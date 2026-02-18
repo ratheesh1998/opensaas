@@ -1,0 +1,17 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Settings – General{% endblock %}
+{% block navbar_title %}Settings › General{% endblock %}
+
+{% block content %}
+<div class="admin-page-block" style="
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    padding: 40px;
+">
+    <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 8px; color: var(--admin-text);">General</h1>
+    <p style="color: var(--admin-text-secondary); margin-bottom: 24px;">General admin and application settings. Options can be added here later.</p>
+</div>
+{% endblock %}

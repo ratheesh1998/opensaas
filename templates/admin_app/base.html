@@ -1,0 +1,387 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} – OpenSaaS</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Admin theme: slate + amber – distinct from main app blue/purple */
+            --admin-bg: #0c1220;
+            --admin-surface: #111827;
+            --admin-surface-hover: #1a2332;
+            --admin-sidebar: #0d1321;
+            --admin-border: #1e293b;
+            --admin-accent: #f59e0b;
+            --admin-accent-hover: #fbbf24;
+            --admin-accent-muted: rgba(245, 158, 11, 0.15);
+            --admin-text: #f1f5f9;
+            --admin-text-secondary: #94a3b8;
+            --admin-text-muted: #64748b;
+            --admin-danger: #ef4444;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--admin-bg);
+            color: var(--admin-text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ----- Sidebar ----- */
+        .admin-sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            background: var(--admin-sidebar);
+            border-right: 1px solid var(--admin-border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--admin-accent), #d97706);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            color: #0c1220;
+        }
+
+        .sidebar-brand-text {
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--admin-text);
+        }
+
+        .sidebar-badge {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 8px;
+            background: var(--admin-accent-muted);
+            color: var(--admin-accent);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 6px;
+        }
+
+        /* Sidebar menu */
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 20px;
+            font-size: 14px;
+            color: var(--admin-text-secondary);
+            text-decoration: none;
+            border-radius: 0;
+            margin: 0 8px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .menu-item:hover {
+            background: var(--admin-surface-hover);
+            color: var(--admin-text);
+        }
+
+        .menu-item.active {
+            background: var(--admin-accent-muted);
+            color: var(--admin-accent);
+            font-weight: 500;
+        }
+
+        .menu-item-icon {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        /* Menu group (e.g. Settings with submenu) */
+        .menu-group {
+            margin-bottom: 4px;
+        }
+
+        .menu-group-title {
+            padding: 10px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--admin-text-muted);
+            margin: 0 8px;
+            border-radius: 8px;
+        }
+
+        .menu-group-content {
+            padding: 2px 8px 8px 20px;
+        }
+
+        .menu-group-item {
+            display: block;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: var(--admin-text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .menu-group-item:hover {
+            background: var(--admin-surface-hover);
+            color: var(--admin-text);
+        }
+
+        .menu-group-item.active {
+            background: var(--admin-accent-muted);
+            color: var(--admin-accent);
+            font-weight: 500;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--admin-border);
+        }
+
+        .sidebar-footer a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            color: var(--admin-text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 8px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .sidebar-footer a:hover {
+            background: var(--admin-surface-hover);
+            color: var(--admin-text);
+        }
+
+        /* ----- Main area ----- */
+        .admin-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* Navbar */
+        .admin-navbar {
+            height: 64px;
+            background: var(--admin-surface);
+            border-bottom: 1px solid var(--admin-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .admin-navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-navbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--admin-text);
+        }
+
+        .admin-navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: var(--admin-surface-hover);
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--admin-text-secondary);
+        }
+
+        .admin-user strong {
+            color: var(--admin-text);
+        }
+
+        .admin-navbar .btn-out {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--admin-text-secondary);
+            background: transparent;
+            border: 1px solid var(--admin-border);
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .admin-navbar .btn-out:hover {
+            border-color: var(--admin-accent);
+            color: var(--admin-accent);
+        }
+
+        .admin-navbar .btn-app {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--admin-accent);
+            background: var(--admin-accent-muted);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .admin-navbar .btn-app:hover {
+            background: rgba(245, 158, 11, 0.25);
+            color: var(--admin-accent-hover);
+        }
+
+        /* Page content */
+        .admin-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .admin-sidebar {
+                width: 72px;
+                padding: 0;
+            }
+            .sidebar-brand-text,
+            .sidebar-badge,
+            .menu-item span:not(.menu-item-icon),
+            .menu-group-title,
+            .menu-group-content {
+                display: none;
+            }
+            .sidebar-header {
+                padding: 16px;
+                justify-content: center;
+            }
+            .sidebar-brand { justify-content: center; }
+            .menu-item { justify-content: center; padding: 10px; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <aside class="admin-sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'admin_dashboard' %}" class="sidebar-brand">
+                <span class="sidebar-logo">A</span>
+                <span class="sidebar-brand-text">OpenSaaS</span>
+                <span class="sidebar-badge">Admin</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{% url 'admin_dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <span class="menu-item-icon">◉</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'admin_users' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_users' or request.resolver_match.url_name == 'admin_user_detail' %}active{% endif %}">
+                <span class="menu-item-icon">👤</span>
+                <span>Users</span>
+            </a>
+            <a href="{% url 'admin_organization_list' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_organization_list' or request.resolver_match.url_name == 'admin_organization_detail' %}active{% endif %}">
+                <span class="menu-item-icon">🏢</span>
+                <span>Organization</span>
+            </a>
+            <a href="{% url 'admin_template_list' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_template_list' or request.resolver_match.url_name == 'admin_template_detail' or request.resolver_match.url_name == 'admin_template_create' or request.resolver_match.url_name == 'admin_template_edit' %}active{% endif %}">
+                <span class="menu-item-icon">📄</span>
+                <span>Template</span>
+            </a>
+            <a href="{% url 'admin_website_list' %}" class="menu-item {% if request.resolver_match.url_name == 'admin_website_list' or request.resolver_match.url_name == 'admin_website_detail' or request.resolver_match.url_name == 'admin_website_create' %}active{% endif %}">
+                <span class="menu-item-icon">🌐</span>
+                <span>Website</span>
+            </a>
+            <div class="menu-group">
+                <div class="menu-group-title">Settings</div>
+                <div class="menu-group-content">
+                    <a href="{% url 'admin_settings_general' %}" class="menu-group-item {% if request.resolver_match.url_name == 'admin_settings_general' %}active{% endif %}">General</a>
+                    <a href="{% url 'admin_credentials' %}" class="menu-group-item {% if request.resolver_match.url_name == 'admin_credentials' %}active{% endif %}">Credentials</a>
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="{% url 'list_organization' %}">← Back to App</a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <header class="admin-navbar">
+            <div class="admin-navbar-left">
+                <span class="admin-navbar-title">{% block navbar_title %}Admin Dashboard{% endblock %}</span>
+            </div>
+            <div class="admin-navbar-right">
+                <a href="{% url 'list_organization' %}" class="btn-app">Open App</a>
+                <div class="admin-user">
+                    <strong>{{ request.user.get_username }}</strong>
+                    <span>Superuser</span>
+                </div>
+                <a href="{% url 'superuser_logout' %}" class="btn-out">Log out</a>
+            </div>
+        </header>
+        <div class="admin-content">
+            {% if messages %}
+            <div class="admin-messages" style="margin-bottom: 20px;">
+                {% for message in messages %}
+                <div style="padding: 12px 16px; border-radius: 10px; font-size: 14px; margin-bottom: 8px;
+                    {% if message.tags == 'error' %}background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5;
+                    {% elif message.tags == 'success' %}background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7;
+                    {% else %}background: var(--admin-accent-muted); border: 1px solid rgba(245,158,11,0.3); color: var(--admin-accent);{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

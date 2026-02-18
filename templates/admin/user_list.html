@@ -1,0 +1,62 @@
+{% extends "admin_app/base.html" %}
+{% load static %}
+
+{% block title %}Users{% endblock %}
+{% block navbar_title %}Users{% endblock %}
+
+{% block content %}
+<div class="admin-page-header" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px;">
+    <h1 style="font-size: 22px; font-weight: 600; color: var(--admin-text);">All Users</h1>
+    <form method="get" action="{% url 'admin_users' %}" style="display: flex; gap: 8px;">
+        <input type="text" name="search" value="{{ search }}" placeholder="Search users…" style="
+            padding: 10px 14px; font-size: 14px; font-family: inherit; color: var(--admin-text); background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 10px; width: 220px; outline: none;
+        ">
+        <button type="submit" style="padding: 10px 18px; font-size: 14px; font-weight: 500; font-family: inherit; color: #0c1220; background: var(--admin-accent); border: none; border-radius: 10px; cursor: pointer;">Search</button>
+    </form>
+</div>
+
+<div class="admin-table-wrap" style="background: var(--admin-surface); border: 1px solid var(--admin-border); border-radius: 14px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background: var(--admin-sidebar); border-bottom: 1px solid var(--admin-border);">
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Username</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Email</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Name</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Staff</th>
+                <th style="text-align: left; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Joined</th>
+                <th style="text-align: right; padding: 14px 20px; font-size: 12px; font-weight: 600; color: var(--admin-text-muted); text-transform: uppercase;">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in page_obj %}
+            <tr style="border-bottom: 1px solid var(--admin-border);">
+                <td style="padding: 14px 20px; font-size: 14px; color: var(--admin-text);">{{ u.username }}</td>
+                <td style="padding: 14px 20px; font-size: 14px; color: var(--admin-text-secondary);">{{ u.email|default:"—" }}</td>
+                <td style="padding: 14px 20px; font-size: 14px; color: var(--admin-text-secondary);">{% if u.get_full_name %}{{ u.get_full_name }}{% else %}—{% endif %}</td>
+                <td style="padding: 14px 20px; font-size: 14px;">{% if u.is_staff %}<span style="color: var(--admin-accent);">Yes</span>{% else %}No{% endif %}</td>
+                <td style="padding: 14px 20px; font-size: 13px; color: var(--admin-text-muted);">{{ u.date_joined|date:"M d, Y" }}</td>
+                <td style="padding: 14px 20px; text-align: right;">
+                    <a href="{% url 'admin_user_detail' u.pk %}" style="font-size: 13px; color: var(--admin-accent); text-decoration: none;">View →</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="padding: 32px 20px; text-align: center; color: var(--admin-text-muted);">No users found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<div class="admin-pagination" style="margin-top: 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 8px 14px; font-size: 13px; color: var(--admin-text-secondary); text-decoration: none; border: 1px solid var(--admin-border); border-radius: 8px;">← Previous</a>
+    {% endif %}
+    <span style="font-size: 13px; color: var(--admin-text-muted);">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}" style="padding: 8px 14px; font-size: 13px; color: var(--admin-accent); text-decoration: none; border: 1px solid var(--admin-border); border-radius: 8px;">Next →</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

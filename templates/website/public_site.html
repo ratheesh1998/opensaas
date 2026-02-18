@@ -1,0 +1,487 @@
+{% load static %}{% load website_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if website %}{{ website.name }}{% if website.tagline %} – {{ website.tagline }}{% endif %}{% else %}SaaS Product{% endif %}</title>
+    <meta name="description" content="{% if website %}{% if website.tagline %}{{ website.tagline }}{% else %}Modern SaaS platform for teams. Start free.{% endif %}{% else %}Modern SaaS product. Start free.{% endif %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            /* ── Niche-driven theme variables (overridden per website) ── */
+            --primary:       {{ theme.primary|default:"#6366f1" }};
+            --primary-light: {{ theme.primary_light|default:"#818cf8" }};
+            --primary-glow:  {{ theme.primary_glow|default:"rgba(99,102,241,0.4)" }};
+            --accent:        {{ theme.accent|default:"#22d3ee" }};
+            --bg:            {{ theme.bg|default:"#0a0a0d" }};
+            --surface:       {{ theme.surface|default:"#12121a" }};
+            --surface-hover: color-mix(in srgb, var(--surface) 80%, var(--primary) 20%);
+            --border:        {{ theme.border|default:"#27272f" }};
+            /* ── Neutral text vars (same across niches) ── */
+            --text:       #fafafa;
+            --text-soft:  #a1a1aa;
+            --text-muted: #71717a;
+            --radius:     20px;
+            --radius-sm:  12px;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ── Nav ─────────────────────────────────────────────────────── */
+        .nav {
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 18px 24px;
+            transition: background .25s, border-color .25s;
+        }
+        .nav.scrolled {
+            background: rgba(10,10,13,.92);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1160px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .nav-logo {
+            font-weight: 700; font-size: 20px;
+            color: var(--text); text-decoration: none;
+            letter-spacing: -.02em;
+        }
+        .nav-links { display: flex; align-items: center; gap: 28px; }
+        .nav-links a {
+            color: var(--text-soft); text-decoration: none;
+            font-size: 15px; font-weight: 500;
+            transition: color .2s;
+        }
+        .nav-links a:hover { color: var(--text); }
+
+        /* ── Niche badge (shows in nav) ────────────────────────────── */
+        .niche-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 10px;
+            font-size: 12px; font-weight: 600;
+            background: color-mix(in srgb, var(--primary) 18%, transparent);
+            border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+            border-radius: 99px;
+            color: var(--primary-light);
+            letter-spacing: .02em;
+        }
+
+        /* ── Buttons ─────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 12px 24px;
+            font-size: 15px; font-weight: 600; font-family: inherit;
+            border-radius: var(--radius-sm); text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
+            border: none; cursor: pointer;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 80%, #000 20%));
+            color: white;
+            box-shadow: 0 4px 20px var(--primary-glow);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px var(--primary-glow);
+        }
+        .btn-ghost {
+            background: var(--surface); color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { border-color: var(--primary); color: var(--primary-light); }
+        .btn:focus-visible, .nav-links a:focus-visible, .nav-logo:focus-visible {
+            outline: 2px solid var(--primary-light);
+            outline-offset: 2px;
+        }
+
+        /* ── Skip link (a11y) ─────────────────────────────────────── */
+        .skip-link {
+            position: absolute;
+            top: -100px;
+            left: 16px;
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            z-index: 200;
+            transition: top .2s;
+        }
+        .skip-link:focus { top: 16px; }
+
+        /* ── Layout ──────────────────────────────────────────────── */
+        section.block {
+            padding: 100px 24px 90px;
+            max-width: 1160px; margin: 0 auto;
+        }
+
+        /* ── Hero ────────────────────────────────────────────────── */
+        .hero-block {
+            min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            padding: 120px 24px 100px;
+            position: relative;
+        }
+        .hero-block::before {
+            content: '';
+            position: absolute; top: -30%; left: 50%;
+            transform: translateX(-50%);
+            width: 140%; height: 90%;
+            background: radial-gradient(ellipse 80% 50%,
+                color-mix(in srgb, var(--primary) 18%, transparent) 0%,
+                transparent 55%);
+            pointer-events: none;
+        }
+        .hero-placeholder {
+            width: 100%; max-width: 560px; height: 280px;
+            margin: 48px auto 0;
+            border-radius: var(--radius);
+            background: linear-gradient(145deg,
+                color-mix(in srgb, var(--primary) 20%, transparent),
+                color-mix(in srgb, var(--accent) 8%, transparent));
+            border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 64px; opacity: .9;
+        }
+        .hero-block .section-title {
+            font-size: clamp(2.75rem, 5.5vw, 4rem);
+            font-weight: 700; line-height: 1.08;
+            letter-spacing: -.03em; margin-bottom: 22px;
+            position: relative;
+        }
+        .hero-block .section-subtitle {
+            font-size: 1.25rem; color: var(--text-soft);
+            max-width: 540px; margin: 0 auto 36px;
+            line-height: 1.75;
+        }
+
+        /* ── Typography ──────────────────────────────────────────── */
+        .section-title {
+            font-size: 2.35rem; font-weight: 700;
+            letter-spacing: -.02em; margin-bottom: 14px;
+        }
+        .section-subtitle {
+            font-size: 1.1rem; color: var(--text-soft); margin-bottom: 28px;
+        }
+        .section-content {
+            color: var(--text-soft); font-size: 1.05rem;
+            max-width: 640px; white-space: pre-wrap;
+        }
+        .section-cta  { margin-top: 32px; }
+        .section-image {
+            margin-top: 40px; border-radius: var(--radius); overflow: hidden;
+            max-width: 100%; box-shadow: 0 24px 48px rgba(0,0,0,.35);
+        }
+        .section-image img { width: 100%; height: auto; display: block; }
+
+        /* ── Features ────────────────────────────────────────────── */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px; margin-top: 40px;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px;
+            transition: border-color .25s, transform .25s, box-shadow .25s;
+        }
+        .feature-card:hover {
+            border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0,0,0,.2);
+        }
+        .feature-card .f-icon {
+            width: 48px; height: 48px; border-radius: 12px;
+            background: linear-gradient(135deg,
+                color-mix(in srgb, var(--primary) 25%, transparent),
+                color-mix(in srgb, var(--accent) 15%, transparent));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 18px;
+        }
+        .feature-card .f-title {
+            font-size: 1.15rem; font-weight: 600;
+            color: var(--text); margin-bottom: 8px;
+        }
+        .feature-card .f-desc {
+            font-size: .95rem; color: var(--text-soft); line-height: 1.6;
+        }
+
+        /* ── Pricing ─────────────────────────────────────────────── */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px; margin-top: 40px;
+        }
+        .pricing-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px;
+            transition: border-color .25s, transform .25s;
+        }
+        .pricing-card:nth-child(2) {
+            border-color: color-mix(in srgb, var(--primary) 50%, transparent);
+            background: color-mix(in srgb, var(--surface) 90%, var(--primary) 10%);
+        }
+        .pricing-card:hover {
+            border-color: color-mix(in srgb, var(--primary) 60%, transparent);
+            transform: translateY(-2px);
+        }
+        .pricing-card .p-name {
+            font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 8px;
+        }
+        .pricing-card .p-price {
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--primary-light); margin-bottom: 12px;
+        }
+        .pricing-card .p-desc {
+            font-size: .95rem; color: var(--text-soft); line-height: 1.6;
+        }
+
+        /* ── Testimonial ─────────────────────────────────────────── */
+        .testimonial-block {
+            text-align: center; max-width: 720px;
+            margin: 0 auto; padding: 56px 40px;
+            background: linear-gradient(145deg,
+                color-mix(in srgb, var(--primary) 10%, transparent),
+                color-mix(in srgb, var(--accent) 4%, transparent));
+            border: 1px solid color-mix(in srgb, var(--primary) 20%, transparent);
+            border-radius: var(--radius);
+        }
+        .testimonial-block .quote {
+            font-size: 1.5rem; font-weight: 500;
+            line-height: 1.6; color: var(--text-soft); font-style: italic;
+        }
+
+        /* ── CTA ─────────────────────────────────────────────────── */
+        .cta-block { text-align: center; padding: 90px 24px; }
+        .cta-box {
+            max-width: 620px; margin: 0 auto;
+            background: linear-gradient(145deg,
+                color-mix(in srgb, var(--primary) 14%, transparent),
+                color-mix(in srgb, var(--accent) 6%, transparent));
+            border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+            border-radius: var(--radius); padding: 56px 48px;
+        }
+
+        /* ── Footer ──────────────────────────────────────────────── */
+        .footer-block {
+            padding: 56px 24px; text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted); font-size: 14px; line-height: 1.8;
+        }
+
+        /* ── Scroll fade-in ──────────────────────────────────────── */
+        .fade-in {
+            opacity: 0; transform: translateY(24px);
+            transition: opacity .6s ease, transform .6s ease;
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── Responsive ─────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .nav { padding: 14px 16px; }
+            .nav-inner { flex-wrap: wrap; gap: 12px; justify-content: center; }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 16px; }
+            .nav-links a, .btn { min-height: 44px; min-width: 44px; align-items: center; justify-content: center; }
+            section.block { padding: 60px 20px 50px; }
+            .hero-block { padding: 100px 20px 80px; }
+            .hero-block .section-title { font-size: clamp(1.75rem, 5vw, 2.5rem); }
+            .features-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .testimonial-block, .cta-box { padding: 36px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <a href="#hero" class="skip-link">Skip to main content</a>
+    <!-- ── Nav ── -->
+    <nav class="nav" id="nav" role="navigation" aria-label="Main">
+        <div class="nav-inner">
+            <a href="{% if website and not website.is_default %}{% url 'public_website_by_slug' slug=website.slug %}{% else %}{% url 'home' %}{% endif %}"
+               class="nav-logo">
+                {% if website %}{{ website.name }}{% else %}Product{% endif %}
+            </a>
+
+            <div class="nav-links">
+                {% for link in nav_links %}
+                    <a href="{{ link.href }}">{{ link.label }}</a>
+                {% empty %}
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#cta">Get started</a>
+                {% endfor %}
+
+                {% if website.niche and website.niche != 'custom' %}
+                    <span class="niche-badge">{{ website.preset.emoji }} {{ website.preset.label }}</span>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'list_organization' %}" class="btn btn-primary">Dashboard</a>
+                {% else %}
+                    <a href="{% url 'superuser_login' %}" class="btn btn-ghost">Sign in</a>
+                    <a href="{% url 'register' %}" class="btn btn-primary">Create account</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── Sections ── -->
+    {% for section in sections %}
+
+    {% if section.section_type == 'hero' %}
+    <section class="block hero-block" id="hero">
+        <div>
+            {% if section.title %}<h1 class="section-title">{{ section.title }}</h1>{% endif %}
+            {% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}
+            {% if section.content %}<div class="section-content">{{ section.content }}</div>{% endif %}
+            {% if section.button_text and section.button_link %}
+            <div class="section-cta">
+                <a href="{{ section.button_link }}" class="btn btn-primary">{{ section.button_text }}</a>
+            </div>
+            {% endif %}
+            {% if section.image %}
+            <div class="section-image"><img src="{{ section.image.url }}" alt=""></div>
+            {% elif section.image_url %}
+            <div class="section-image"><img src="{{ section.image_url }}" alt="" loading="lazy"></div>
+            {% else %}
+            <div class="hero-placeholder" aria-hidden="true">
+                {{ website.preset.emoji|default:"◇" }}
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% elif section.section_type == 'features' %}
+    <section class="block fade-in" id="features">
+        {% if section.title %}<h2 class="section-title">{{ section.title }}</h2>{% endif %}
+        {% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}
+        {% with lines=section.content|split_lines %}
+        {% if lines %}
+        <div class="features-grid">
+            {% for line in lines %}
+            {% with parts=line|split_by:" — " %}
+            <div class="feature-card">
+                <div class="f-icon">{{ parts.0|slice:":2" }}</div>
+                <div class="f-title">{{ parts.0|slice:"2:" }}</div>
+                <div class="f-desc">{{ parts.1|default:line }}</div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        {% if section.content %}<div class="section-content">{{ section.content|linebreaksbr }}</div>{% endif %}
+        {% endif %}
+        {% endwith %}
+        {% if section.image %}<div class="section-image"><img src="{{ section.image.url }}" alt=""></div>{% elif section.image_url %}<div class="section-image"><img src="{{ section.image_url }}" alt="" loading="lazy"></div>{% endif %}
+    </section>
+
+    {% elif section.section_type == 'pricing' %}
+    <section class="block fade-in" id="pricing">
+        {% if section.title %}<h2 class="section-title">{{ section.title }}</h2>{% endif %}
+        {% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}
+        {% with lines=section.content|split_lines %}
+        {% if lines %}
+        <div class="pricing-grid">
+            {% for line in lines %}
+            {% with parts=line|split_by:" — " %}
+            <div class="pricing-card">
+                {% if parts.0 %}<div class="p-name">{{ parts.0 }}</div>{% endif %}
+                {% if parts.1 %}<div class="p-price">{{ parts.1 }}</div>{% endif %}
+                {% if parts.2 %}<div class="p-desc">{{ parts.2 }}</div>{% else %}
+                {% if parts.1 %}<div class="p-desc">{{ parts.1 }}</div>{% endif %}{% endif %}
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        {% if section.content %}<div class="section-content">{{ section.content|linebreaksbr }}</div>{% endif %}
+        {% endif %}
+        {% endwith %}
+        {% if section.image %}<div class="section-image"><img src="{{ section.image.url }}" alt=""></div>{% elif section.image_url %}<div class="section-image"><img src="{{ section.image_url }}" alt="" loading="lazy"></div>{% endif %}
+    </section>
+
+    {% elif section.section_type == 'testimonial' %}
+    <section class="block fade-in">
+        <div class="testimonial-block">
+            {% if section.image or section.image_url %}
+            <div class="section-image" style="margin-bottom:20px;"><img src="{% if section.image %}{{ section.image.url }}{% else %}{{ section.image_url }}{% endif %}" alt="" loading="lazy" style="width:80px;height:80px;border-radius:50%;object-fit:cover;"></div>
+            {% endif %}
+            {% if section.content %}<p class="quote">{{ section.content }}</p>{% endif %}
+        </div>
+    </section>
+
+    {% elif section.section_type == 'cta' %}
+    <section class="block cta-block fade-in" id="cta">
+        <div class="cta-box">
+            {% if section.title %}<h2 class="section-title">{{ section.title }}</h2>{% endif %}
+            {% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}
+            {% if section.content %}<div class="section-content">{{ section.content }}</div>{% endif %}
+            {% if section.button_text and section.button_link %}
+            <div style="margin-top: 28px;">
+                <a href="{{ section.button_link }}" class="btn btn-primary">{{ section.button_text }}</a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    {% elif section.section_type == 'footer' %}
+    <footer class="footer-block">
+        {% if section.content %}{{ section.content|expand_placeholders:website|linebreaksbr }}{% endif %}
+    </footer>
+
+    {% else %}
+    <section class="block fade-in">
+        {% if section.title %}<h2 class="section-title">{{ section.title }}</h2>{% endif %}
+        {% if section.subtitle %}<p class="section-subtitle">{{ section.subtitle }}</p>{% endif %}
+        {% if section.content %}<div class="section-content">{{ section.content }}</div>{% endif %}
+        {% if section.button_text and section.button_link %}
+        <a href="{{ section.button_link }}" class="btn btn-primary">{{ section.button_text }}</a>
+        {% endif %}
+        {% if section.image %}<div class="section-image"><img src="{{ section.image.url }}" alt=""></div>{% elif section.image_url %}<div class="section-image"><img src="{{ section.image_url }}" alt="" loading="lazy"></div>{% endif %}
+    </section>
+    {% endif %}
+
+    {% endfor %}
+
+    <!-- ── Empty state ── -->
+    {% if not sections %}
+    <section class="block hero-block" id="hero">
+        <div>
+            <h1 class="section-title">{% if website %}{{ website.name }}{% else %}Welcome{% endif %}</h1>
+            <p class="section-subtitle">{% if website.tagline %}{{ website.tagline }}{% else %}Add sections in admin to customise this page.{% endif %}</p>
+            <a href="{% url 'register' %}" class="btn btn-primary">Create account</a>
+        </div>
+    </section>
+    {% endif %}
+
+    <script>
+        // Sticky nav
+        const nav = document.getElementById('nav');
+        const updateNav = () => nav.classList.toggle('scrolled', window.scrollY > 20);
+        updateNav();
+        window.addEventListener('scroll', updateNav);
+
+        // Scroll-triggered fade-in
+        const observer = new IntersectionObserver(
+            (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+            { threshold: 0.1 }
+        );
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
